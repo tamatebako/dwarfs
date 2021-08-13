@@ -97,7 +97,7 @@ if(WITH_PYTHON)
   )
 endif()
 
-find_package(Boost 1.67 REQUIRED COMPONENTS ${DWARFS_BOOST_MODULES})
+find_package(Boost 1.65 REQUIRED COMPONENTS ${DWARFS_BOOST_MODULES})
 
 if(WITH_PYTHON)
   set(BOOST_PYTHON_LIBS ${Boost_LIBRARIES})
@@ -107,10 +107,10 @@ endif()
 
 find_package(PkgConfig REQUIRED)
 
-pkg_check_modules(FUSE IMPORTED_TARGET fuse>=2.9.9)
+pkg_check_modules(FUSE IMPORTED_TARGET fuse>=2.9.7)
 pkg_check_modules(FUSE3 IMPORTED_TARGET fuse3>=3.4.1)
 pkg_check_modules(LIBLZ4 IMPORTED_TARGET liblz4>=1.8.3)
-pkg_check_modules(LIBLZMA IMPORTED_TARGET liblzma>=5.2.4)
+pkg_check_modules(LIBLZMA IMPORTED_TARGET liblzma>=5.2.2)
 pkg_check_modules(LIBARCHIVE IMPORTED_TARGET libarchive>=3.1.2)
 pkg_check_modules(ZSTD IMPORTED_TARGET libzstd>=1.4.5)
 pkg_check_modules(XXHASH IMPORTED_TARGET libxxhash)
@@ -129,7 +129,7 @@ if(XXHASH_FOUND)
 endif()
 
 if(NOT FUSE_FOUND AND NOT FUSE3_FOUND)
-  message(FATAL_ERROR "No FUSE or FUSE3 library found")
+  message(WARNING "No FUSE or FUSE3 library found")
 endif()
 
 if(WITH_TESTS)
