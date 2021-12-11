@@ -34,13 +34,13 @@ name: Ubuntu
 
 on:
   push:
-    branches: [ tebako-new ]
+    branches: [ tebako ]
     paths-ignore:
       - 'docs/**'
       - '**.adoc'
       - '**.md'
   pull_request:
-    branches: [ tebako-new ]
+    branches: [ tebako ]
     paths-ignore:
       - 'docs/**'
       - '**.adoc'
@@ -51,7 +51,7 @@ on:
 
 env:
   MAKEFLAGS: -j4
-# Ruby  (this is required for for ronn)
+# Ruby  (this is required for ronn)
   RUBY_VER:   "2.7.4"
 
 jobs:
@@ -113,7 +113,7 @@ jobs:
           sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 100 --slave /usr/bin/g++ g++ /usr/bin/g++-9 --slave /usr/bin/gcov gcov /usr/bin/gcov-9
           sudo update-alternatives --set gcc /usr/bin/gcc-9    
 
-      - name: Install packages Ubuntu
+      - name: Install packages
         run: |
           sudo apt-get -y update
           sudo apt-get -y install \
@@ -137,7 +137,7 @@ jobs:
         run: sudo apt-get install libfmt-dev
 
 # sudo apt install ronn does not work for bionic
-# On focal  it cannot process one of files, so we do it natively
+# On focal  it cannot process one of files, so we do it natively as well
 # Note that libruby-dev is required under the hood
 
       - name: Install Ruby
@@ -162,7 +162,7 @@ jobs:
           cd build
           cmake .. -DSTATIC_BUILD_DO_NOT_USE:BOOL=ON -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/install
 
-      - name: Configure static
+      - name: Configure tebako preferred
         if: ${{ matrix.cfg.mode == 'tebako' }}
         run: | 
           mkdir build
