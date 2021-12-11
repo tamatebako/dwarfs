@@ -20,7 +20,7 @@
 Symbol concat(Symbol a, Symbol b) {
    Symbol s;
    u32 length = a.length()+b.length();
-   if (length > Symbol::maxLength) length = Symbol::maxLength; 
+   if (length > Symbol::maxLength) length = Symbol::maxLength;
    s.set_code_len(FSST_CODE_MASK, length);
    s.val.num = (b.val.num << (8*a.length())) | a.val.num;
    return s;
@@ -62,7 +62,7 @@ SymbolTable *buildSymbolTable(Counters& counters, vector<u8*> line, size_t len[]
    int bestGain = (int) -FSST_SAMPLEMAXSZ; // worst case (everything exception)
    size_t sampleFrac = 128;
 
-   // start by determining the terminator. We use the (lowest) most infrequent byte as terminator 
+   // start by determining the terminator. We use the (lowest) most infrequent byte as terminator
    st->zeroTerminated = zeroTerminated;
    if (zeroTerminated) {
       st->terminator = 0; // except in case of zeroTerminated mode, then byte 0 is terminator regardless frequency
@@ -116,7 +116,7 @@ SymbolTable *buildSymbolTable(Counters& counters, vector<u8*> line, size_t len[]
                   pos2 = st->shortCodes[word & 0xFFFF] & FSST_CODE_MASK;
                   word &= (0xFFFFFFFFFFFFFFFF >> (u8) s.icl);
                   if ((s.icl < FSST_ICL_FREE) & (s.val.num == word)) {
-                     pos2 = s.code(); 
+                     pos2 = s.code();
 		     cur += s.length();
                   } else if (pos2 >= FSST_CODE_BASE) {
                      cur += 2;
@@ -124,14 +124,14 @@ SymbolTable *buildSymbolTable(Counters& counters, vector<u8*> line, size_t len[]
                      pos2 = st->byteCodes[word & 0xFF] & FSST_CODE_MASK;
                      cur += 1;
                   }
-               } else if (cur==end) { 
+               } else if (cur==end) {
                   break;
                } else {
                   assert(cur<end);
                   pos2 = st->findLongestSymbol(cur, end);
                   cur += st->symbols[pos2].length();
                }
- 
+
                // compute compressed output size
                gain += ((int) (cur-old))-(1+isEscapeCode(pos2));
 
@@ -145,7 +145,7 @@ SymbolTable *buildSymbolTable(Counters& counters, vector<u8*> line, size_t len[]
             }
          }
       }
-      return gain; 
+      return gain;
    };
 
    auto makeTable = [&](SymbolTable *st, Counters &counters) {
@@ -154,7 +154,7 @@ SymbolTable *buildSymbolTable(Counters& counters, vector<u8*> line, size_t len[]
 
       // artificially make terminater the most frequent symbol so it gets included
       u16 terminator = st->nSymbols?FSST_CODE_BASE:st->terminator;
-      counters.count1Set(terminator,65535); 
+      counters.count1Set(terminator,65535);
 
       auto addOrInc = [&](unordered_set<QSymbol> &cands, Symbol s, u64 count) {
          if (count < (5*sampleFrac)/128) return; // improves both compression speed (less candidates), but also quality!!
@@ -170,7 +170,7 @@ SymbolTable *buildSymbolTable(Counters& counters, vector<u8*> line, size_t len[]
       };
 
       // add candidate symbols based on counted frequency
-      for (u32 pos1=0; pos1<FSST_CODE_BASE+(size_t) st->nSymbols; pos1++) { 
+      for (u32 pos1=0; pos1<FSST_CODE_BASE+(size_t) st->nSymbols; pos1++) {
          u32 cnt1 = counters.count1GetNext(pos1); // may advance pos1!!
          if (!cnt1) continue;
 
@@ -183,7 +183,7 @@ SymbolTable *buildSymbolTable(Counters& counters, vector<u8*> line, size_t len[]
              s1.val.str[0] == st->terminator) { // multi-byte symbols cannot contain the terminator byte
             continue;
          }
-         for (u32 pos2=0; pos2<FSST_CODE_BASE+(size_t)st->nSymbols; pos2++) { 
+         for (u32 pos2=0; pos2<FSST_CODE_BASE+(size_t)st->nSymbols; pos2++) {
             u32 cnt2 = counters.count2GetNext(pos1, pos2); // may advance pos2!!
             if (!cnt2) continue;
 
@@ -222,7 +222,7 @@ SymbolTable *buildSymbolTable(Counters& counters, vector<u8*> line, size_t len[]
       if (gain >= bestGain) { // a new best solution!
          counters.backup1(bestCounters);
          *bestTable = *st; bestGain = gain;
-      } 
+      }
       if (sampleFrac >= 128) break; // we do 5 rounds (sampleFrac=8,38,68,98,128)
       makeTable(st, counters);
    }
@@ -235,19 +235,19 @@ SymbolTable *buildSymbolTable(Counters& counters, vector<u8*> line, size_t len[]
 
 static inline size_t compressSIMD(SymbolTable &symbolTable, u8* symbolBase, size_t nlines, size_t len[], u8* line[], size_t size, u8* dst, size_t lenOut[], u8* strOut[], int unroll) {
    size_t curLine = 0, inOff = 0, outOff = 0, batchPos = 0, empty = 0, budget = size;
-   u8 *lim = dst + size, *codeBase = symbolBase + (1<<18); // 512KB temp space for compressing 512 strings 
+   u8 *lim = dst + size, *codeBase = symbolBase + (1<<18); // 512KB temp space for compressing 512 strings
    SIMDjob input[512];  // combined offsets of input strings (cur,end), and string #id (pos) and output (dst) pointer
    SIMDjob output[512]; // output are (pos:9,dst:19) end pointers (compute compressed length from this)
    size_t jobLine[512]; // for which line in the input sequence was this job (needed because we may split a line into multiple jobs)
 
    while (curLine < nlines && outOff <= (1<<19)) {
       size_t prevLine = curLine, chunk, curOff = 0;
- 
+
       // bail out if the output buffer cannot hold the compressed next string fully
       if (((len[curLine]-curOff)*2 + 7) > budget) break; // see below for the +7
       else budget -= (len[curLine]-curOff)*2;
 
-      strOut[curLine] = (u8*) 0; 
+      strOut[curLine] = (u8*) 0;
       lenOut[curLine] = 0;
 
       do {
@@ -262,19 +262,19 @@ static inline size_t compressSIMD(SymbolTable &symbolTable, u8* symbolBase, size
             job.end = job.cur + chunk;
             job.pos = batchPos;
             job.out = outOff;
-   
+
             // worst case estimate for compressed size (+7 is for the scatter that writes extra 7 zeros)
             outOff += 7 + 2*(size_t)(job.end - job.cur); // note, total size needed is 512*(511*2+7) bytes.
             if (outOff > (1<<19)) break; // simdbuf may get full, stop before this chunk
-   
+
             // register job in this batch
             input[batchPos] = job;
             jobLine[batchPos] = curLine;
-   
+
             if (chunk == 0) {
                empty++; // detect empty chunks -- SIMD code cannot handle empty strings, so they need to be filtered out
             } else {
-               // copy string chunk into temp buffer 
+               // copy string chunk into temp buffer
                memcpy(symbolBase + inOff, line[curLine] + curOff, chunk);
                inOff += chunk;
                curOff += chunk;
@@ -282,37 +282,37 @@ static inline size_t compressSIMD(SymbolTable &symbolTable, u8* symbolBase, size
             }
             if (++batchPos == 512) break;
          } while(curOff < len[curLine]);
-   
+
          if ((batchPos == 512) || (outOff > (1<<19)) || (++curLine >= nlines)) { // cannot accumulate more?
             if (batchPos-empty >= 32) { // if we have enough work, fire off fsst_compressAVX512 (32 is due to max 4x8 unrolling)
-               // radix-sort jobs on length (longest string first) 
+               // radix-sort jobs on length (longest string first)
                // -- this provides best load balancing and allows to skip empty jobs at the end
-               u16 sortpos[513]; 
+               u16 sortpos[513];
                memset(sortpos, 0, sizeof(sortpos));
-   
-               // calculate length histo 
-               for(size_t i=0; i<batchPos; i++) { 
-                  size_t len = input[i].end - input[i].cur; 
+
+               // calculate length histo
+               for(size_t i=0; i<batchPos; i++) {
+                  size_t len = input[i].end - input[i].cur;
                   sortpos[512UL - len]++;
                }
                // calculate running sum
-               for(size_t i=1; i<=512; i++) 
-                  sortpos[i] += sortpos[i-1]; 
-   
+               for(size_t i=1; i<=512; i++)
+                  sortpos[i] += sortpos[i-1];
+
                // move jobs to their final destination
                SIMDjob inputOrdered[512];
                for(size_t i=0; i<batchPos; i++) {
-                  size_t len = input[i].end - input[i].cur; 
+                  size_t len = input[i].end - input[i].cur;
                   size_t pos = sortpos[511UL - len]++;
-                  inputOrdered[pos] = input[i]; 
+                  inputOrdered[pos] = input[i];
                 }
-               // finally.. SIMD compress max 256KB of simdbuf into (max) 512KB of simdbuf (but presumably much less..) 
+               // finally.. SIMD compress max 256KB of simdbuf into (max) 512KB of simdbuf (but presumably much less..)
                for(size_t done = fsst_compressAVX512(symbolTable, codeBase, symbolBase, inputOrdered, output, batchPos-empty, unroll);
-                   done < batchPos; done++) output[done] = inputOrdered[done]; 
+                   done < batchPos; done++) output[done] = inputOrdered[done];
             } else {
                memcpy(output, input, batchPos*sizeof(SIMDjob));
             }
-   
+
             // finish encoding (unfinished strings in process, plus the few last strings not yet processed)
             for(size_t i=0; i<batchPos; i++) {
                SIMDjob job = output[i];
@@ -332,21 +332,21 @@ static inline size_t compressSIMD(SymbolTable &symbolTable, u8* symbolBase, size
                         *out++ = (u8) s.code(); cur += s.length();
                      } else {
                         // could be a 2-byte or 1-byte code, or miss
-                        // handle everything with predication 
-                        *out = (u8) code; 
+                        // handle everything with predication
+                        *out = (u8) code;
                         out += 1+((code&FSST_CODE_BASE)>>8);
-                        cur += (code>>FSST_LEN_BITS); 
+                        cur += (code>>FSST_LEN_BITS);
                     }
                   }
                   job.out = out - codeBase;
-               } 
+               }
                // postprocess job info
                job.cur = 0;
-               job.end = job.out - input[job.pos].out; // misuse .end field as compressed size 
+               job.end = job.out - input[job.pos].out; // misuse .end field as compressed size
                job.out = input[job.pos].out; // reset offset to start of encoded string
-               input[job.pos] = job; 
+               input[job.pos] = job;
             }
-   
+
             // copy out the result data
             for(size_t i=0; i<batchPos; i++) {
                size_t lineNr = jobLine[i]; // the sort must be order-preserving, as we concatenate results string in order
@@ -356,11 +356,11 @@ static inline size_t compressSIMD(SymbolTable &symbolTable, u8* symbolBase, size
                memcpy(dst, codeBase+input[i].out, sz);
                dst += sz;
             }
-   
+
             // go for the next batch of 512 chunks
             inOff = outOff = batchPos = empty = 0;
             budget = (size_t) (lim - dst);
-         } 
+         }
       } while (curLine == prevLine && outOff <= (1<<19));
    }
    return curLine;
@@ -391,16 +391,16 @@ static inline size_t compressBulk(SymbolTable &symbolTable, size_t nlines, size_
                *out++ = (u8) s.code(); cur += s.length();
             } else if (avoidBranch) {
                // could be a 2-byte or 1-byte code, or miss
-               // handle everything with predication 
-               *out = (u8) code; 
+               // handle everything with predication
+               *out = (u8) code;
                out += 1+((code&FSST_CODE_BASE)>>8);
-               cur += (code>>FSST_LEN_BITS); 
+               cur += (code>>FSST_LEN_BITS);
             } else if ((u8) code < byteLim) {
                // 2 byte code after checking there is no longer pattern
                *out++ = (u8) code; cur += 2;
             } else {
-               // 1 byte code or miss. 
-               *out = (u8) code; 
+               // 1 byte code or miss.
+               *out = (u8) code;
                out += 1+((code&FSST_CODE_BASE)>>8); // predicated - tested with a branch, that was always worse
                cur++;
             }
@@ -413,10 +413,10 @@ static inline size_t compressBulk(SymbolTable &symbolTable, size_t nlines, size_
       strOut[curLine] = out;
       do {
          bool skipCopy = symbolTable.zeroTerminated;
-         cur = strIn[curLine] + curOff; 
+         cur = strIn[curLine] + curOff;
          chunk = lenIn[curLine] - curOff;
          if (chunk > 511) {
-            chunk = 511; // we need to compress in chunks of 511 in order to be byte-compatible with simd-compressed FSST 
+            chunk = 511; // we need to compress in chunks of 511 in order to be byte-compatible with simd-compressed FSST
             skipCopy = false; // need to put terminator, so no in place mem usage possible
          }
          if ((2*chunk+7) > (size_t) (lim-out)) {
@@ -426,8 +426,8 @@ static inline size_t compressBulk(SymbolTable &symbolTable, size_t nlines, size_
             memcpy(buf, cur, chunk);
             cur = buf;
             buf[chunk] = (u8) symbolTable.terminator;
-         } 
-         end = cur + chunk; 
+         }
+         end = cur + chunk;
          // based on symboltable stats, choose a variant that is nice to the branch predictor
          if (noSuffixOpt) {
             compressVariant(true,false);
@@ -438,7 +438,7 @@ static inline size_t compressBulk(SymbolTable &symbolTable, size_t nlines, size_
          }
       } while((curOff += chunk) < lenIn[curLine]);
       lenOut[curLine] = (size_t) (out - strOut[curLine]);
-   } 
+   }
    return curLine;
 }
 
@@ -449,11 +449,11 @@ vector<u8*> makeSample(u8* sampleBuf, u8* strIn[], size_t **lenRef, size_t nline
    size_t totSize = 0, *lenIn = *lenRef;
    vector<u8*> sample;
 
-   for(size_t i=0; i<nlines; i++) 
+   for(size_t i=0; i<nlines; i++)
       totSize += lenIn[i];
 
-   if (totSize < FSST_SAMPLETARGET) { 
-      for(size_t i=0; i<nlines; i++) 
+   if (totSize < FSST_SAMPLETARGET) {
+      for(size_t i=0; i<nlines; i++)
          sample.push_back(strIn[i]);
    } else {
       size_t sampleRnd = FSST_HASH(4637947);
@@ -464,7 +464,7 @@ vector<u8*> makeSample(u8* sampleBuf, u8* strIn[], size_t **lenRef, size_t nline
          // choose a non-empty line
          sampleRnd = FSST_HASH(sampleRnd);
          size_t linenr = sampleRnd % nlines;
-         while (lenIn[linenr] == 0) 
+         while (lenIn[linenr] == 0)
             if (++linenr == nlines) linenr = 0;
 
          // choose a chunk
@@ -488,8 +488,8 @@ extern "C" fsst_encoder_t* fsst_create(size_t n, size_t lenIn[], u8 *strIn[], in
    vector<u8*> sample = makeSample(sampleBuf, strIn, &sampleLen, n?n:1); // careful handling of input to get a right-size and representative sample
    Encoder *encoder = new Encoder();
    encoder->symbolTable = shared_ptr<SymbolTable>(buildSymbolTable(encoder->counters, sample, sampleLen, zeroTerminated));
-   if (sampleLen != lenIn) delete[] sampleLen; 
-   delete[] sampleBuf; 
+   if (sampleLen != lenIn) delete[] sampleLen;
+   delete[] sampleBuf;
    return (fsst_encoder_t*) encoder;
 }
 
@@ -500,7 +500,7 @@ extern "C" fsst_encoder_t* fsst_duplicate(fsst_encoder_t *encoder) {
    return (fsst_encoder_t*) e;
 }
 
-// export a symbol table in compact format. 
+// export a symbol table in compact format.
 extern "C" u32 fsst_export(fsst_encoder_t *encoder, u8 *buf) {
    Encoder *e = (Encoder*) encoder;
    // In ->version there is a versionnr, but we hide also suffixLim/terminator/nSymbols there.
@@ -511,16 +511,16 @@ extern "C" u32 fsst_export(fsst_encoder_t *encoder, u8 *buf) {
    // 'lossy perfect' hashing scheme is *unable* to contain other-endian-produced symbol tables.
    // Doing a endian-conversion during hashing will be slow and self-defeating.
    //
-   // Overall, we could support reconstructing an encoder for incremental compression, but 
+   // Overall, we could support reconstructing an encoder for incremental compression, but
    // should enforce equal-endianness. Bit of a bummer. Not going there now.
-   // 
+   //
    // The version field is now there just for future-proofness, but not used yet
-   
+
    // version allows keeping track of fsst versions, track endianness, and encoder reconstruction
-   u64 version = (FSST_VERSION << 32) |  // version is 24 bits, most significant byte is 0 
-                 (((u64) e->symbolTable->suffixLim) << 24) | 
-                 (((u64) e->symbolTable->terminator) << 16) | 
-                 (((u64) e->symbolTable->nSymbols) << 8) | 
+   u64 version = (FSST_VERSION << 32) |  // version is 24 bits, most significant byte is 0
+                 (((u64) e->symbolTable->suffixLim) << 24) |
+                 (((u64) e->symbolTable->terminator) << 16) |
+                 (((u64) e->symbolTable->nSymbols) << 8) |
                  FSST_ENDIAN_MARKER; // least significant byte is nonzero
 
    /* do not assume unaligned reads here */
@@ -530,7 +530,7 @@ extern "C" u32 fsst_export(fsst_encoder_t *encoder, u8 *buf) {
       buf[9+i] = (u8) e->symbolTable->lenHisto[i];
    u32 pos = 17;
 
-   // emit only the used bytes of the symbols 
+   // emit only the used bytes of the symbols
    for(u32 i = e->symbolTable->zeroTerminated; i < e->symbolTable->nSymbols; i++)
       for(u32 j = 0; j < e->symbolTable->symbols[i].length(); j++)
          buf[pos++] = e->symbolTable->symbols[i].val.str[j]; // serialize used symbol bytes
@@ -551,7 +551,7 @@ extern "C" u32 fsst_import(fsst_decoder_t *decoder, u8 *buf) {
    decoder->zeroTerminated = buf[8]&1;
    memcpy(lenHisto, buf+9, 8);
 
-   // in case of zero-terminated, first symbol is "" (zero always, may be overwritten) 
+   // in case of zero-terminated, first symbol is "" (zero always, may be overwritten)
    decoder->len[0] = 1;
    decoder->symbol[0] = 0;
 
@@ -564,15 +564,15 @@ extern "C" u32 fsst_import(fsst_decoder_t *decoder, u8 *buf) {
       for(u32 i=0; i < lenHisto[(l&7) /* 1,2,3,4,5,6,7,0 */]; i++, code++)  {
          decoder->len[code] = (l&7)+1; /* len = 2,3,4,5,6,7,8,1  */
          decoder->symbol[code] = 0;
-         for(u32 j=0; j<decoder->len[code]; j++) 
+         for(u32 j=0; j<decoder->len[code]; j++)
             ((u8*) &decoder->symbol[code])[j] = buf[pos++]; // note this enforces 'little endian' symbols
       }
    }
-   if (decoder->zeroTerminated) lenHisto[0]++; 
+   if (decoder->zeroTerminated) lenHisto[0]++;
 
    // fill unused symbols with text "corrupt". Gives a chance to detect corrupted code sequences (if there are unused symbols).
    while(code<255) {
-       decoder->symbol[code] = FSST_CORRUPT;    
+       decoder->symbol[code] = FSST_CORRUPT;
        decoder->len[code++] = 8;
    }
    return pos;
@@ -591,7 +591,7 @@ size_t compressImpl(Encoder *e, size_t nlines, size_t lenIn[], u8 *strIn[], size
    return _compressImpl(e, nlines, lenIn, strIn, size, output, lenOut, strOut, noSuffixOpt, avoidBranch, simd);
 }
 
-// adaptive choosing of scalar compression method based on symbol length histogram 
+// adaptive choosing of scalar compression method based on symbol length histogram
 inline size_t _compressAuto(Encoder *e, size_t nlines, size_t lenIn[], u8 *strIn[], size_t size, u8 *output, size_t *lenOut, u8 *strOut[], int simd) {
    bool avoidBranch = false, noSuffixOpt = false;
    if (100*e->symbolTable->lenHisto[1] > 65*e->symbolTable->nSymbols && 100*e->symbolTable->suffixLim > 95*e->symbolTable->lenHisto[1]) {
@@ -611,13 +611,13 @@ size_t compressAuto(Encoder *e, size_t nlines, size_t lenIn[], u8 *strIn[], size
 extern "C" size_t fsst_compress(fsst_encoder_t *encoder, size_t nlines, size_t lenIn[], u8 *strIn[], size_t size, u8 *output, size_t *lenOut, u8 *strOut[]) {
    // to be faster than scalar, simd needs 64 lines or more of length >=12; or fewer lines, but big ones (totLen > 32KB)
    size_t totLen = accumulate(lenIn, lenIn+nlines, 0);
-   int simd = totLen > nlines*12 && (nlines > 64 || totLen > (size_t) 1<<15); 
+   int simd = totLen > nlines*12 && (nlines > 64 || totLen > (size_t) 1<<15);
    return _compressAuto((Encoder*) encoder, nlines, lenIn, strIn, size, output, lenOut, strOut, 3*simd);
 }
 
 /* deallocate encoder */
 extern "C" void fsst_destroy(fsst_encoder_t* encoder) {
-   Encoder *e = (Encoder*) encoder; 
+   Encoder *e = (Encoder*) encoder;
    delete e;
 }
 
@@ -627,6 +627,6 @@ extern "C" fsst_decoder_t fsst_decoder(fsst_encoder_t *encoder) {
    u32 cnt1 = fsst_export(encoder, buf);
    fsst_decoder_t decoder;
    u32 cnt2 = fsst_import(&decoder, buf);
-   assert(cnt1 == cnt2); (void) cnt1; (void) cnt2; 
+   assert(cnt1 == cnt2); (void) cnt1; (void) cnt2;
    return decoder;
 }

@@ -522,7 +522,7 @@ foreach(tgt dwarfs ${BINARY_TARGETS})
 
   target_include_directories(${tgt} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-  if (STATIC_BUILD_DO_NOT_USE OR TEBAKO_PREFERRED_CFG) 
+  if (STATIC_BUILD_DO_NOT_USE OR TEBAKO_PREFERRED_CFG)
     set(STATIC_BUILD ON)
   else()
     set(STATIC_BUILD OFF)
@@ -743,8 +743,8 @@ if(STATIC_BUILD_DO_NOT_USE OR TEBAKO_PREFERRED_CFG)
     # -static-libgcc above and gcc_eh below is all together an ugly trick to
     # enforce static linking
     # ...................................................................
-  
-    if (TEBAKO_PREFERRED_CFG)  
+
+    if (TEBAKO_PREFERRED_CFG)
       target_link_libraries(
         ${tgt}
         static_libunwind
