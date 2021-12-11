@@ -34,7 +34,7 @@ name: Ubuntu
 
 on:
   push:
-    branches: [ main, tebako ]
+    branches: [ main ]
     paths-ignore:
       - 'docs/**'
       - '**.adoc'
