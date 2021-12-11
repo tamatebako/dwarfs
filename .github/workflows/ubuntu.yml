@@ -1,6 +1,6 @@
 # Copyright (c) 2021, [Ribose Inc](https://www.ribose.com).
 # All rights reserved.
-# This file is a part of tamitebako
+# This file is a part of tamatebako
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -29,18 +29,17 @@
 #
 # Also this file contains comments that will be useful is dwarfs has to be build 
 # in different environment, not GHA.
-
 name: Ubuntu
 
 on:
   push:
-    branches: [ tebako ]
+    branches: [ libdwarfs_wr* ]
     paths-ignore:
       - 'docs/**'
       - '**.adoc'
       - '**.md'
   pull_request:
-    branches: [ tebako ]
+    branches: [ libdwarfs_wr* ]
     paths-ignore:
       - 'docs/**'
       - '**.adoc'
@@ -56,22 +55,12 @@ env:
 
 jobs:
   build:
-    name: ${{ matrix.cfg.os }} [CC ${{ matrix.env.CC }}, ${{ matrix.cfg.mode }}]
-    runs-on: ${{ matrix.cfg.os }}
+    name: ${{ matrix.os }} [CC ${{ matrix.env.CC }}]
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        cfg:
-          - os: ubuntu-18.04
-            mode: tests
-          - os: ubuntu-latest
-            mode: tests
-          - os: ubuntu-18.04
-            mode: tebako
-          - os: ubuntu-latest
-            mode: tebako
-          - os: ubuntu-latest
-            mode: static
+        os: [ ubuntu-18.04, ubuntu-20.04 ]
         env:
           - CC: gcc
             CXX: g++
@@ -106,7 +95,7 @@ jobs:
 # sudo add-apt-repository ppa:ubuntu-toolchain-r/test
 # sudo apt update
 # sudo apt install gcc-9 g++-9
-#
+
       - name: Switch to gcc-9
         if: ${{ matrix.env.CC == 'gcc' }}
         run: |
@@ -121,10 +110,10 @@ jobs:
           libdouble-conversion-dev libiberty-dev liblz4-dev libssl-dev liblzma-dev \
           libfuse-dev libunwind-dev libdwarf-dev libelf-dev libgoogle-glog-dev libgtest-dev \
           libboost-context-dev libboost-filesystem-dev libboost-program-options-dev \
-          libboost-regex-dev libboost-system-dev libboost-thread-dev  
+          libboost-regex-dev libboost-system-dev libboost-thread-dev libarchive-dev 
 
       - name: Install libfmt 6 (bionic)
-        if: ${{ matrix.cfg.os == 'ubuntu-18.04' }}
+        if: ${{ matrix.os == 'ubuntu-18.04' }}
         run: |
           sudo apt-get remove libfmt-dev
           sudo apt-get install software-properties-common
@@ -133,7 +122,7 @@ jobs:
           sudo apt-get install libfmt-dev
 
       - name: Install libfmt 6 (focal)
-        if: ${{ matrix.cfg.os == 'ubuntu-latest' }}
+        if: ${{ matrix.os == 'ubuntu-20.04' }}
         run: sudo apt-get install libfmt-dev
 
 # sudo apt install ronn does not work for bionic
@@ -148,43 +137,18 @@ jobs:
       - name: Install ronn
         run: sudo gem install ronn
 
-      - name: Configure with tests
-        if: ${{ matrix.cfg.mode == 'tests' }}
+      - name: Configure
         run: | 
           mkdir build
           cd build
           cmake .. -DWITH_TESTS=1 -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/install
-
-      - name: Configure static
-        if: ${{ matrix.cfg.mode == 'static' }}
-        run: | 
-          mkdir build
-          cd build
-          cmake .. -DSTATIC_BUILD_DO_NOT_USE:BOOL=ON -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/install
-
-      - name: Configure tebako preferred
-        if: ${{ matrix.cfg.mode == 'tebako' }}
-        run: | 
-          mkdir build
-          cd build
-          cmake .. -DTEBAKO_PREFERRED_CFG:BOOL=ON -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/install
-
+          
       - name: Build
         run: | 
           cd build
           make -j4
 
       - name: Test
-        if: ${{ matrix.cfg.mode == 'tests' }}
         run: | 
           cd build
           make test
-
-      - name: Verify static build with ldd
-        if: ${{ matrix.cfg.mode == 'static' }}
-        run: | 
-          cd build
-          ldd dwarfs2 2>&1  | grep -i 'not a dynamic executable'
-          ldd dwarfsck 2>&1  | grep -i 'not a dynamic executable'
-          ldd dwarfsextract 2>&1 | grep -i 'not a dynamic executable'
-          ldd mkdwarfs 2>&1 | grep -i 'not a dynamic executable'
