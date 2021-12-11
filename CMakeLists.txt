@@ -743,7 +743,6 @@ if(STATIC_BUILD_DO_NOT_USE OR TEBAKO_PREFERRED_CFG)
     # -static-libgcc above and gcc_eh below is all together an ugly trick to
     # enforce static linking
     # ...................................................................
-
     if (TEBAKO_PREFERRED_CFG)
       target_link_libraries(
         ${tgt}
