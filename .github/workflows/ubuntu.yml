@@ -106,8 +106,10 @@ jobs:
       - name: Switch to clang-11
         if: ${{ matrix.env.CC == 'clang' }}
         run: |
-          sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-11 100 --slave /usr/bin/clang++ clang++ /usr/bin/clang++-11
+          sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-11 100
+          sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-11 100
           sudo update-alternatives --set clang /usr/bin/clang-11
+          sudo update-alternatives --set clang++ /usr/bin/clang++-11
 
       - name: Switch to gcc-9
         if: ${{ matrix.env.CC == 'gcc' }}
