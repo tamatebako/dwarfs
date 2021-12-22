@@ -54,6 +54,7 @@ elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
   add_compile_options(-fcolor-diagnostics)
 #  if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "11.0.0")
     # for some reason, clang-10 binaries crash upon throwing exceptions
+    message("CXX_COMPILER_VERSION=${CMAKE_CXX_COMPILER_VERSION}")
     add_compile_options(-fno-omit-frame-pointer)
 #  endif()
 endif()
