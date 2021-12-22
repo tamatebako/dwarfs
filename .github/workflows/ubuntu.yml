@@ -147,7 +147,7 @@ jobs:
           cd jemalloc-5.2.1
           ./configure
           make
-          make install
+          sudo make install
 
       - name: Install libfmt 6, libjemalloc 5 (focal)
         if: ${{ matrix.os == 'ubuntu-20.04' }}
