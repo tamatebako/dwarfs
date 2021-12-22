@@ -24,8 +24,6 @@ include(CheckCXXSourceCompiles)
 
 option(WITH_TESTS "build with tests" OFF)
 option(WITH_BENCHMARKS "build with benchmarks" OFF)
-option(WITH_PYTHON "build with Python scripting support" OFF)
-option(WITH_LEGACY_FUSE "build fuse2 driver even if we have fuse3" OFF)
 option(ENABLE_ASAN "enable address sanitizer" OFF)
 option(ENABLE_TSAN "enable thread sanitizer" OFF)
 option(ENABLE_UBSAN "enable undefined behaviour sanitizer" OFF)
@@ -52,10 +50,10 @@ if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
   set(CMAKE_CXX_FLAGS_RELEASE "-DNDEBUG -O2 -g")
 elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
   add_compile_options(-fcolor-diagnostics)
-#  if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "11.0.0")
+  if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "11.0.0")
     # for some reason, clang-10 binaries crash upon throwing exceptions
     add_compile_options(-fno-omit-frame-pointer)
-#  endif()
+  endif()
 endif()
 
 include(${CMAKE_SOURCE_DIR}/cmake/version.cmake)
@@ -85,18 +83,6 @@ endif()
 
 list(APPEND DWARFS_BOOST_MODULES date_time filesystem program_options system)
 
-if(WITH_PYTHON)
-  # TODO: would be nicer to be able to support a range of python versions
-  find_package(Python3 ${WITH_PYTHON_VERSION} EXACT REQUIRED
-               COMPONENTS Development)
-  list(APPEND DWARFS_BOOST_MODULES
-       "python${Python3_VERSION_MAJOR}${Python3_VERSION_MINOR}")
-  message(
-    STATUS
-      "Enabling support for Python ${Python3_VERSION_MAJOR}.${Python3_VERSION_MINOR}"
-  )
-endif()
-
 find_package(Boost 1.65 REQUIRED COMPONENTS ${DWARFS_BOOST_MODULES})
 
 if(WITH_PYTHON)
@@ -107,8 +93,6 @@ endif()
 
 find_package(PkgConfig REQUIRED)
 
-pkg_check_modules(FUSE IMPORTED_TARGET fuse>=2.9.7)
-pkg_check_modules(FUSE3 IMPORTED_TARGET fuse3>=3.4.1)
 pkg_check_modules(LIBLZ4 IMPORTED_TARGET liblz4>=1.8.3)
 pkg_check_modules(LIBLZMA IMPORTED_TARGET liblzma>=5.2.2)
 pkg_check_modules(LIBARCHIVE IMPORTED_TARGET libarchive>=3.1.2)
@@ -128,16 +112,10 @@ if(XXHASH_FOUND)
     XXHASH_VERSION_OK)
 endif()
 
-if(NOT FUSE_FOUND AND NOT FUSE3_FOUND)
-  message(WARNING "No FUSE or FUSE3 library found")
-endif()
-
 if(WITH_TESTS)
   find_program(DIFF_BIN diff DOC "compare files line by line" REQUIRED)
   find_program(TAR_BIN tar DOC "an archiving utility" REQUIRED)
 endif()
-
-find_program(RONN_EXE ronn DOC "ronn man page generator" REQUIRED)
 
 if(USE_JEMALLOC)
   find_package(Jemalloc REQUIRED)
@@ -281,33 +259,6 @@ add_executable(dwarfsextract src/dwarfsextract.cpp)
 
 list(APPEND BINARY_TARGETS mkdwarfs dwarfsck dwarfsbench dwarfsextract)
 
-if(FUSE3_FOUND)
-  add_executable(dwarfs-bin src/dwarfs.cpp)
-  target_compile_definitions(dwarfs-bin PRIVATE _FILE_OFFSET_BITS=64
-                                                FUSE_USE_VERSION=35)
-  set_target_properties(dwarfs-bin PROPERTIES OUTPUT_NAME dwarfs)
-  target_link_libraries(dwarfs-bin PkgConfig::FUSE3)
-  add_custom_target(mount.dwarfs ALL COMMAND ${CMAKE_COMMAND} -E create_symlink
-                                             dwarfs mount.dwarfs)
-  install(TARGETS dwarfs-bin RUNTIME DESTINATION sbin)
-  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/mount.dwarfs DESTINATION sbin)
-  list(APPEND BINARY_TARGETS dwarfs-bin)
-endif()
-
-if(FUSE_FOUND AND (WITH_LEGACY_FUSE OR NOT FUSE3_FOUND))
-  add_executable(dwarfs2-bin src/dwarfs.cpp)
-  target_compile_definitions(dwarfs2-bin PRIVATE _FILE_OFFSET_BITS=64
-                                                 FUSE_USE_VERSION=29)
-  set_target_properties(dwarfs2-bin PROPERTIES OUTPUT_NAME dwarfs2)
-  target_link_libraries(dwarfs2-bin PkgConfig::FUSE)
-  add_custom_target(
-    mount.dwarfs2 ALL COMMAND ${CMAKE_COMMAND} -E create_symlink dwarfs2
-                              mount.dwarfs2)
-  install(TARGETS dwarfs2-bin RUNTIME DESTINATION sbin)
-  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/mount.dwarfs2 DESTINATION sbin)
-  list(APPEND BINARY_TARGETS dwarfs2-bin)
-endif()
-
 if(WITH_TESTS OR WITH_BENCHMARKS)
   add_library(test_helpers test/test_helpers.cpp test/test_strings.cpp
                            test/loremipsum.cpp)
@@ -353,37 +304,6 @@ if(WITH_BENCHMARKS)
   target_link_libraries(dwarfs_benchmark test_helpers PkgConfig::BENCHMARK)
   list(APPEND BINARY_TARGETS dwarfs_benchmark)
 endif()
-
-foreach(man dwarfs.1 mkdwarfs.1 dwarfsck.1 dwarfsextract.1 dwarfs-format.5)
-  string(REGEX MATCH "^[^.]*" docname "${man}")
-  string(REGEX MATCH "[^.]*$" section "${man}")
-  set(man_dir "${CMAKE_CURRENT_BINARY_DIR}/man${section}")
-  set(man_input "${CMAKE_CURRENT_SOURCE_DIR}/doc/${docname}.md")
-  set(man_output "${man_dir}/${man}")
-
-  execute_process(
-    COMMAND ${RONN_EXE}
-    INPUT_FILE "${man_input}"
-    RESULT_VARIABLE ronn_result
-    OUTPUT_VARIABLE ronn_output
-    ERROR_VARIABLE ronn_error)
-
-  if(${ronn_result} EQUAL 0)
-    add_custom_command(
-      OUTPUT "${man_output}"
-      COMMAND mkdir -p "${man_dir}"
-      COMMAND ${RONN_EXE} <"${man_input}" >"${man_output}"
-      DEPENDS "${man_input}")
-    list(APPEND MAN_PAGES "${man_output}")
-    list(APPEND MAN_DIRS "${man_dir}")
-  else()
-    message(WARNING "${RONN_EXE} failed to process ${man}")
-  endif()
-endforeach()
-
-list(REMOVE_DUPLICATES MAN_DIRS)
-add_custom_target(manpages DEPENDS ${MAN_PAGES})
-add_dependencies(mkdwarfs manpages)
 
 list(
   APPEND
