@@ -96,20 +96,20 @@ jobs:
 # sudo apt update
 # sudo apt install gcc-9 g++-9
 
-      - name: Install clang-11
-        if: ${{ matrix.env.CC == 'clang' && matrix.os == 'ubuntu-18.04' }}
-        run: |
-          wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
-          sudo add-apt-repository 'deb http://apt.llvm.org/bionic/  llvm-toolchain-bionic-11  main'
-          sudo apt-get install llvm-11 lldb-11 llvm-11-dev libllvm11 llvm-11-runtime clang-tools-11
+#      - name: Install clang-11
+#        if: ${{ matrix.env.CC == 'clang' && matrix.os == 'ubuntu-18.04' }}
+#        run: |
+#          wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+#          sudo add-apt-repository 'deb http://apt.llvm.org/bionic/  llvm-toolchain-bionic-11  main'
+#          sudo apt-get install llvm-11 lldb-11 llvm-11-dev libllvm11 llvm-11-runtime clang-tools-11
 
-      - name: Switch to clang-11
-        if: ${{ matrix.env.CC == 'clang' }}
-        run: |
-          sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-11 100
-          sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-11 100
-          sudo update-alternatives --set clang /usr/bin/clang-11
-          sudo update-alternatives --set clang++ /usr/bin/clang++-11
+#      - name: Switch to clang-11
+#        if: ${{ matrix.env.CC == 'clang' }}
+#        run: |
+#          sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-11 100
+#          sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-11 100
+#          sudo update-alternatives --set clang /usr/bin/clang-11
+#          sudo update-alternatives --set clang++ /usr/bin/clang++-11
 
       - name: Switch to gcc-9
         if: ${{ matrix.env.CC == 'gcc' }}
@@ -121,7 +121,7 @@ jobs:
         run: |
           sudo apt-get -y update
           sudo apt-get -y install \
-          binutils-dev libarchive-dev libevent-dev libjemalloc-dev acl-dev \
+          binutils-dev libarchive-dev libevent-dev acl-dev \
           libdouble-conversion-dev libiberty-dev liblz4-dev libssl-dev liblzma-dev \
           libfuse-dev libunwind-dev libdwarf-dev libelf-dev libgoogle-glog-dev libgtest-dev \
           libboost-context-dev libboost-filesystem-dev libboost-program-options-dev \
@@ -136,9 +136,22 @@ jobs:
           sudo apt-get update
           sudo apt-get install libfmt-dev
 
-      - name: Install libfmt 6 (focal)
+      - name: Install libjemalloc 5 (bionic)
+        if: ${{ matrix.os == 'ubuntu-18.04' }}
+        run: |
+          sudo apt-get remove libjemalloc-dev
+          mkdir jemalloc
+          cd jemalloc
+          wget https://github.com/jemalloc/jemalloc/releases/download/5.2.1/jemalloc-5.2.1.tar.bz2
+          tar -xf jemalloc-5.2.1.tar.bz2
+          cd jemalloc-5.2.1
+          ./configure
+          make
+          make install
+
+      - name: Install libfmt 6, libjemalloc 5 (focal)
         if: ${{ matrix.os == 'ubuntu-20.04' }}
-        run: sudo apt-get install libfmt-dev
+        run: sudo apt-get install libfmt-dev libjemalloc-dev 
 
 # sudo apt install ronn does not work for bionic
 # On focal  it cannot process one of files, so we do it natively as well

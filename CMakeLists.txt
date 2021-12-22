@@ -52,11 +52,10 @@ if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
   set(CMAKE_CXX_FLAGS_RELEASE "-DNDEBUG -O2 -g")
 elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
   add_compile_options(-fcolor-diagnostics)
-#  if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "11.0.0")
-    # for some reason, clang-10 binaries crash upon throwing exceptions
-    message("CXX_COMPILER_VERSION=${CMAKE_CXX_COMPILER_VERSION}")
+  if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "12.0.0")
+  # for some reason, clang-10 and clang-11 binaries crash upon throwing exceptions
     add_compile_options(-fno-omit-frame-pointer)
-#  endif()
+  endif()
 endif()
 
 include(${CMAKE_SOURCE_DIR}/cmake/version.cmake)
