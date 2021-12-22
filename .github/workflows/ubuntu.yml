@@ -96,11 +96,24 @@ jobs:
 # sudo apt update
 # sudo apt install gcc-9 g++-9
 
+      - name: Install clang-11
+        if: ${{ matrix.env.CC == 'clang' && matrix.os == 'ubuntu-18.04' }}
+        run: |
+          wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+          sudo add-apt-repository 'deb http://apt.llvm.org/bionic/  llvm-toolchain-bionic-11  main'
+          sudo apt-get install llvm-11 lldb-11 llvm-11-dev libllvm11 llvm-11-runtime clang-tools-11
+
+      - name: Switch to clang-11
+        if: ${{ matrix.env.CC == 'clang' }}
+        run: |
+          sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-11 100 --slave /usr/bin/clang++ clang++ /usr/bin/clang++-11
+          sudo update-alternatives --set clang /usr/bin/clang-11
+
       - name: Switch to gcc-9
         if: ${{ matrix.env.CC == 'gcc' }}
         run: |
           sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 100 --slave /usr/bin/g++ g++ /usr/bin/g++-9 --slave /usr/bin/gcov gcov /usr/bin/gcov-9
-          sudo update-alternatives --set gcc /usr/bin/gcc-9    
+          sudo update-alternatives --set gcc /usr/bin/gcc-9
 
       - name: Install packages
         run: |
