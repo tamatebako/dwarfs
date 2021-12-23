@@ -123,10 +123,15 @@ jobs:
         run: |
           sudo apt-get install libfuse3-dev
 
-      - name: Remove libfuse (2, 3) (tebako-optimized mode)
-        if: ${{ matrix.mode == 'tebako-optimized' }}
+      - name: Remove libfuse 2 (bionic, tebako-optimized mode)
+        if: ${{ matrix.os == 'ubuntu-18.04' && matrix.mode == 'tebako-optimized' }}
         run: |
-          sudo apt-get remove libfuse3 libfuse3-dev libfuse libfuse2-dev
+          sudo apt-get remove fuse libfuse-dev
+
+      - name: Remove libfuse 2 (focal, tebako-optimized mode)
+        if: ${{ matrix.os == 'ubuntu-20.04' && matrix.mode == 'tebako-optimized' }}
+        run: |
+          sudo apt-get remove fuse3 libfuse3-dev fuse libfuse-dev
 
       - name: Install libfmt 6 (bionic)
         if: ${{ matrix.os == 'ubuntu-18.04' }}
