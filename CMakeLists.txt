@@ -105,6 +105,8 @@ if(WITH_PYTHON)
   list(FILTER BOOST_PYTHON_LIBS INCLUDE REGEX python)
 endif()
 
+include(${CMAKE_SOURCE_DIR}/cmake/modules/FindBisonAndFlex.cmake)
+
 find_package(PkgConfig REQUIRED)
 
 pkg_check_modules(FUSE IMPORTED_TARGET fuse>=2.9.7)
@@ -153,6 +155,7 @@ set(compiler_only
 
 add_subdirectory(folly EXCLUDE_FROM_ALL)
 add_subdirectory(fbthrift EXCLUDE_FROM_ALL)
+
 if(NOT (ZSTD_FOUND AND PREFER_SYSTEM_ZSTD))
   add_subdirectory(zstd/build/cmake EXCLUDE_FROM_ALL)
 endif()
