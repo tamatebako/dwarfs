@@ -127,7 +127,7 @@ jobs:
         run: |
           sudo apt-get remove libjemalloc-dev
           wget -q https://github.com/jemalloc/jemalloc/releases/download/5.2.1/jemalloc-5.2.1.tar.bz2 
-          tar -xz jemalloc-5.2.1.tar.bz2
+          tar -xf jemalloc-5.2.1.tar.bz2
           cd jemalloc-5.2.1
           ./configure
           make
