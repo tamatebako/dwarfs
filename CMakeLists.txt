@@ -137,7 +137,7 @@ if(WITH_TESTS)
   find_program(TAR_BIN tar DOC "an archiving utility" REQUIRED)
 endif()
 
-find_program(RONN_EXE ronn DOC "ronn man page generator" REQUIRED)
+find_program(RONN_EXE ronn DOC "ronn man page generator")
 
 if(USE_JEMALLOC)
   find_package(Jemalloc REQUIRED)
@@ -354,36 +354,40 @@ if(WITH_BENCHMARKS)
   list(APPEND BINARY_TARGETS dwarfs_benchmark)
 endif()
 
-foreach(man dwarfs.1 mkdwarfs.1 dwarfsck.1 dwarfsextract.1 dwarfs-format.5)
-  string(REGEX MATCH "^[^.]*" docname "${man}")
-  string(REGEX MATCH "[^.]*$" section "${man}")
-  set(man_dir "${CMAKE_CURRENT_BINARY_DIR}/man${section}")
-  set(man_input "${CMAKE_CURRENT_SOURCE_DIR}/doc/${docname}.md")
-  set(man_output "${man_dir}/${man}")
+if(RONN_EXE_FOUND)
+  foreach(man dwarfs.1 mkdwarfs.1 dwarfsck.1 dwarfsextract.1 dwarfs-format.5)
+    string(REGEX MATCH "^[^.]*" docname "${man}")
+    string(REGEX MATCH "[^.]*$" section "${man}")
+    set(man_dir "${CMAKE_CURRENT_BINARY_DIR}/man${section}")
+    set(man_input "${CMAKE_CURRENT_SOURCE_DIR}/doc/${docname}.md")
+    set(man_output "${man_dir}/${man}")
 
-  execute_process(
-    COMMAND ${RONN_EXE}
-    INPUT_FILE "${man_input}"
-    RESULT_VARIABLE ronn_result
-    OUTPUT_VARIABLE ronn_output
-    ERROR_VARIABLE ronn_error)
+    execute_process(
+      COMMAND ${RONN_EXE}
+      INPUT_FILE "${man_input}"
+      RESULT_VARIABLE ronn_result
+      OUTPUT_VARIABLE ronn_output
+      ERROR_VARIABLE ronn_error)
 
-  if(${ronn_result} EQUAL 0)
-    add_custom_command(
-      OUTPUT "${man_output}"
-      COMMAND mkdir -p "${man_dir}"
-      COMMAND ${RONN_EXE} <"${man_input}" >"${man_output}"
-      DEPENDS "${man_input}")
-    list(APPEND MAN_PAGES "${man_output}")
-    list(APPEND MAN_DIRS "${man_dir}")
-  else()
-    message(WARNING "${RONN_EXE} failed to process ${man}")
-  endif()
-endforeach()
+    if(${ronn_result} EQUAL 0)
+      add_custom_command(
+        OUTPUT "${man_output}"
+        COMMAND mkdir -p "${man_dir}"
+        COMMAND ${RONN_EXE} <"${man_input}" >"${man_output}"
+        DEPENDS "${man_input}")
+      list(APPEND MAN_PAGES "${man_output}")
+      list(APPEND MAN_DIRS "${man_dir}")
+    else()
+      message(WARNING "${RONN_EXE} failed to process ${man}")
+    endif()
+  endforeach()
 
-list(REMOVE_DUPLICATES MAN_DIRS)
-add_custom_target(manpages DEPENDS ${MAN_PAGES})
-add_dependencies(mkdwarfs manpages)
+  list(REMOVE_DUPLICATES MAN_DIRS)
+  add_custom_target(manpages DEPENDS ${MAN_PAGES})
+  add_dependencies(mkdwarfs manpages)
+else()
+  message(WARNING "ronn was not found, skipping generation of manpages")
+endif()
 
 list(
   APPEND

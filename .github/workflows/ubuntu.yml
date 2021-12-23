@@ -55,13 +55,13 @@ env:
 
 jobs:
   build:
-    name: ${{ matrix.os }} [CC ${{ matrix.env.CC }}]
+    name: ${{ matrix.os }} [CC ${{ matrix.env.CC }}, mode ${{ matrix.mode }}]
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         os: [ ubuntu-18.04, ubuntu-20.04 ]
-        mode: [ tests, tebako ]
+        mode: [ full, tebako-optimized ]
         env:
           - CC: gcc
             CXX: g++
@@ -126,10 +126,7 @@ jobs:
         if: ${{ matrix.os == 'ubuntu-18.04' }}
         run: |
           sudo apt-get remove libjemalloc-dev
-          mkdir jemalloc
-          cd jemalloc
-          wget https://github.com/jemalloc/jemalloc/releases/download/5.2.1/jemalloc-5.2.1.tar.bz2
-          tar -xf jemalloc-5.2.1.tar.bz2
+          wget -qO- https://github.com/jemalloc/jemalloc/releases/download/5.2.1/jemalloc-5.2.1.tar.bz2 | tar xvz -
           cd jemalloc-5.2.1
           ./configure
           make
@@ -144,11 +141,13 @@ jobs:
 # Note that libruby-dev is required under the hood
 
       - name: Install Ruby
+        if: ${{ matrix.env.CC == 'tests' }}
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: ${{ env.RUBY_VER }}
 
       - name: Install ronn
+        if: ${{ matrix.env.CC == 'tests' }}
         run: sudo gem install ronn
 
       - name: Configure
