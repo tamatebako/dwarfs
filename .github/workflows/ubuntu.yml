@@ -55,7 +55,7 @@ env:
 
 jobs:
   build:
-    name: ${{ matrix.os }} [CC ${{ matrix.env.CC }}, mode ${{ matrix.mode }}]
+    name: ${{ matrix.os }} [${{ matrix.env.CC }}, ${{ matrix.mode }}]
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -126,7 +126,8 @@ jobs:
         if: ${{ matrix.os == 'ubuntu-18.04' }}
         run: |
           sudo apt-get remove libjemalloc-dev
-          wget -qO- https://github.com/jemalloc/jemalloc/releases/download/5.2.1/jemalloc-5.2.1.tar.bz2 | tar xvz -
+          wget -q https://github.com/jemalloc/jemalloc/releases/download/5.2.1/jemalloc-5.2.1.tar.bz2 
+          tar xz jemalloc-5.2.1.tar.bz2
           cd jemalloc-5.2.1
           ./configure
           make
