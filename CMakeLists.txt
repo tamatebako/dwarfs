@@ -316,25 +316,37 @@ if(WITH_TESTS OR WITH_BENCHMARKS)
 endif()
 
 if(WITH_TESTS)
+  if (FUSE3_FOUND OR FUSE_FOUND)
+    set(WITH_TOOLS_TEST ON)
+  else()
+    set(WITH_TOOLS_TEST OFF)
+  endif()
+
   add_executable(dwarfs_test test/dwarfs.cpp)
   add_executable(dwarfs_compat_test test/dwarfs_compat.cpp)
   add_executable(dwarfs_badfs_test test/dwarfs_badfs.cpp)
-  if (FUSE3_FOUND OR FUSE_FOUND)
+  if(WITH_TOOLS_TEST)
     add_executable(dwarfs_tools_test test/dwarfs_tools.cpp)
   endif()
 
   target_link_libraries(dwarfs_test test_helpers gtest gtest_main)
   target_link_libraries(dwarfs_compat_test gtest gtest_main)
   target_link_libraries(dwarfs_badfs_test gtest gtest_main)
-  target_link_libraries(dwarfs_tools_test test_helpers gtest gtest_main)
+  if(WITH_TOOLS_TEST)
+    target_link_libraries(dwarfs_tools_test test_helpers gtest gtest_main)
+  endif()
 
-  list(APPEND BINARY_TARGETS dwarfs_test dwarfs_compat_test dwarfs_badfs_test
-       dwarfs_tools_test)
+  list(APPEND BINARY_TARGETS dwarfs_test dwarfs_compat_test dwarfs_badfs_test)
+  if(WITH_TOOLS_TEST)
+    list(APPEND BINARY_TARGETS dwarfs_tools_test)
+  endif()
 
   gtest_discover_tests(dwarfs_test)
   gtest_discover_tests(dwarfs_compat_test)
   gtest_discover_tests(dwarfs_badfs_test)
-  gtest_discover_tests(dwarfs_tools_test)
+  if(WITH_TOOLS_TEST)
+    gtest_discover_tests(dwarfs_tools_test)
+  endif()
 
   target_compile_definitions(dwarfs_compat_test
                              PRIVATE TEST_DATA_DIR=\"${CMAKE_SOURCE_DIR}/test\")
@@ -342,11 +354,13 @@ if(WITH_TESTS)
   target_compile_definitions(dwarfs_badfs_test
                              PRIVATE TEST_DATA_DIR=\"${CMAKE_SOURCE_DIR}/test\")
 
-  target_compile_definitions(
-    dwarfs_tools_test
-    PRIVATE TEST_DATA_DIR=\"${CMAKE_SOURCE_DIR}/test\"
-            TOOLS_BIN_DIR=\"${CMAKE_CURRENT_BINARY_DIR}\"
-            DIFF_BIN=\"${DIFF_BIN}\" TAR_BIN=\"${TAR_BIN}\")
+  if(WITH_TOOLS_TEST)
+    target_compile_definitions(
+      dwarfs_tools_test
+      PRIVATE TEST_DATA_DIR=\"${CMAKE_SOURCE_DIR}/test\"
+              TOOLS_BIN_DIR=\"${CMAKE_CURRENT_BINARY_DIR}\"
+              DIFF_BIN=\"${DIFF_BIN}\" TAR_BIN=\"${TAR_BIN}\")
+  endif()
 endif()
 
 if(WITH_BENCHMARKS)
