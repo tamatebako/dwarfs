@@ -148,7 +148,7 @@ jobs:
 
       - name: Install libjemalloc (not bionic or not clang)
         if: ${{ matrix.os != 'ubuntu-18.04' && matrix.env.CC != 'clang' }}
-        sudo apt-get -y install libjemalloc-dev          
+        run: sudo apt-get -y install libjemalloc-dev          
 
       - name: Install libjemalloc 5 (bionic and clang)
         if: ${{ matrix.os == 'ubuntu-18.04' && matrix.env.CC == 'clang' }}
