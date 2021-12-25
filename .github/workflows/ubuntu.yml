@@ -143,7 +143,7 @@ jobs:
           sudo apt-get install libfmt-dev
 
       - name: Install libjemalloc 5 (bionic)
-        if: ${{ matrix.os == 'ubuntu-18.04' }}
+        if: ${{ matrix.os == 'ubuntu-18.04' && matrix.env.CC == 'clang' }}
         run: |
           sudo apt-get remove libjemalloc-dev
           wget -q https://github.com/jemalloc/jemalloc/releases/download/5.2.1/jemalloc-5.2.1.tar.bz2
