@@ -147,7 +147,7 @@ jobs:
         run: sudo apt-get install libfmt-dev          
 
       - name: Install libjemalloc (not bionic or not clang)
-        if: ${{ matrix.os != 'ubuntu-18.04' && matrix.env.CC != 'clang' }}
+        if: ${{ matrix.os != 'ubuntu-18.04' || matrix.env.CC != 'clang' }}
         run: sudo apt-get -y install libjemalloc-dev          
 
       - name: Install libjemalloc 5 (bionic and clang)
