@@ -105,7 +105,7 @@ if(WITH_PYTHON)
   list(FILTER BOOST_PYTHON_LIBS INCLUDE REGEX python)
 endif()
 
-include(${CMAKE_SOURCE_DIR}/cmake/modules/FindBisonAndFlex.cmake)
+include(${CMAKE_SOURCE_DIR}/cmake/modules/SetupDarwinEnvironment.cmake)
 
 find_package(PkgConfig REQUIRED)
 

@@ -57,11 +57,7 @@ env:
   CXX: clang++
 # https://github.com/actions/virtual-environments/blob/main/images/macos/macos-10.15-Readme.md
   OPENSSL_ROOT_DIR: /usr/local/opt/openssl@1.1
-  CXXFLAGS: -std=gnu++14 -DTARGET_OS_SIMULATOR=0 -DTARGET_OS_IPHONE=0
-# libarchive is keg-only, which means it was not symlinked into /usr/local,
-# because macOS already provides this software and installing another version in
-# parallel can cause all kinds of trouble.            
-  PKG_CONFIG_PATH: /usr/local/opt/libarchive/lib/pkgconfig
+  
 
 jobs:
   build:

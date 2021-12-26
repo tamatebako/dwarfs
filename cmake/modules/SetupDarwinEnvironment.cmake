@@ -23,9 +23,33 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-#  https://stackoverflow.com/questions/53877344/cannot-configure-cmake-to-look-for-homebrew-installed-version-of-bison
+
 
 if (CMAKE_HOST_SYSTEM_NAME MATCHES "Darwin")
+    set(ENV{CXXFLAGS} "-std=gnu++14 -DTARGET_OS_SIMULATOR=0 -DTARGET_OS_IPHONE=0")
+    
+    execute_process(
+        COMMAND brew --prefix
+        RESULT_VARIABLE BREW_PREFIX_RES
+        OUTPUT_VARIABLE BREW_PREFIX
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+    if(NOT (BREW_PREFIX_RES EQUAL 0 AND EXISTS ${BREW_PREFIX}))
+        message(FATAL "Could not find brew setup")
+    endif()
+    
+    message("Using homebrew environment at ${BREW_PREIX}")
+
+    set(ENV{CPATH} "${BREW_PREFIX}/include:$ENV{CPATH}")
+# https://github.com/actions/virtual-environments/blob/main/images/macos/macos-10.15-Readme.md    
+    set(ENV{OPENSSL_ROOT_DIR} "${BREW_PREFIX}/opt/openssl@1.1")
+
+# libarchive is keg-only, which means it was not symlinked into /usr/local,
+# because macOS already provides this software and installing another version in
+# parallel can cause all kinds of trouble.            
+    set(ENV{PKG_CONFIG_PATH} "${BREW_PREFIX}/opt/libarchive/lib/pkgconfig:$ENV{PKG_CONFIG_PATH}"
+
+#  https://stackoverflow.com/questions/53877344/cannot-configure-cmake-to-look-for-homebrew-installed-version-of-bison
     execute_process(
         COMMAND brew --prefix bison
         RESULT_VARIABLE BREW_BISON
