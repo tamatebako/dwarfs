@@ -55,10 +55,7 @@ env:
   MAKEFLAGS: -j4
   CC: clang
   CXX: clang++
-# https://github.com/actions/virtual-environments/blob/main/images/macos/macos-10.15-Readme.md
-  OPENSSL_ROOT_DIR: /usr/local/opt/openssl@1.1
   
-
 jobs:
   build:
     name: ${{ matrix.os }}
