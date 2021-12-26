@@ -16,9 +16,9 @@
 # dwarfs.  If not, see <https://www.gnu.org/licenses/>.
 #
 project(dwarfs)
-include(ExternalProject)
-
 cmake_minimum_required(VERSION 3.13.4)
+
+include(ExternalProject)
 
 include(CheckCXXSourceCompiles)
 
@@ -59,6 +59,7 @@ elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
 endif()
 
 include(${CMAKE_SOURCE_DIR}/cmake/version.cmake)
+include(${CMAKE_SOURCE_DIR}/cmake/modules/MacOsEnvironment.cmake)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules")
 
@@ -104,8 +105,6 @@ if(WITH_PYTHON)
   list(FILTER Boost_LIBRARIES EXCLUDE REGEX python)
   list(FILTER BOOST_PYTHON_LIBS INCLUDE REGEX python)
 endif()
-
-include(${CMAKE_SOURCE_DIR}/cmake/modules/MacOsEnvironment.cmake)
 
 find_package(PkgConfig REQUIRED)
 

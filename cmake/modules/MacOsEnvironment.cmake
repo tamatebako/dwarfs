@@ -26,8 +26,6 @@
 
 
 if (CMAKE_HOST_SYSTEM_NAME MATCHES "Darwin")
-    set(ENV{CXXFLAGS} "-std=gnu++14 -DTARGET_OS_SIMULATOR=0 -DTARGET_OS_IPHONE=0")
-    
     execute_process(
         COMMAND brew --prefix
         RESULT_VARIABLE BREW_PREFIX_RES
@@ -38,7 +36,7 @@ if (CMAKE_HOST_SYSTEM_NAME MATCHES "Darwin")
         message(FATAL "Could not find brew setup")
     endif()
     
-    message("Using homebrew environment at ${BREW_PREIX}")
+    message("Using homebrew environment at ${BREW_PREFIX}")
 
     set(CMAKE_PREFIX_PATH "${BREW_PREFIX}")
     
