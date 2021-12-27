@@ -111,8 +111,7 @@ jobs:
           libdouble-conversion-dev libiberty-dev liblz4-dev libssl-dev liblzma-dev \
           libunwind-dev libdwarf-dev libelf-dev libgoogle-glog-dev libgtest-dev \
           libboost-filesystem-dev libboost-program-options-dev libboost-system-dev \
-          libboost-date-time-dev libboost-context-dev libboost-regex-dev
-#libboost-system-dev libboost-thread-dev libarchive-dev
+          libboost-date-time-dev libboost-context-dev libboost-regex-dev libboost-thread-dev
 
       - name: Install libfuse 2 (bionic)
         if: ${{ matrix.os == 'ubuntu-18.04' && matrix.mode == 'full' }}
@@ -129,7 +128,7 @@ jobs:
         run: |
           sudo apt-get remove fuse libfuse-dev
 
-      - name: Remove libfuse 2 (focal, tebako-optimized mode)
+      - name: Remove libfuse 3 (focal, tebako-optimized mode)
         if: ${{ matrix.os == 'ubuntu-20.04' && matrix.mode == 'tebako-optimized' }}
         run: |
           sudo apt-get remove fuse3 libfuse3-dev fuse libfuse-dev
@@ -167,13 +166,13 @@ jobs:
 # Note that libruby-dev is required under the hood
 
       - name: Install Ruby
-        if: ${{ matrix.env.CC == 'full' }}
+        if: ${{ matrix.mode == 'full' }}
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: ${{ env.RUBY_VER }}
 
       - name: Install ronn
-        if: ${{ matrix.env.CC == 'full' }}
+        if: ${{ matrix.mode == 'full' }}
         run: sudo gem install ronn
 
       - name: Configure
@@ -188,7 +187,6 @@ jobs:
           make -j4
 
       - name: Test
-        if: ${{ matrix.env.CC == 'tests' }}
         run: |
           cd build
           make test
