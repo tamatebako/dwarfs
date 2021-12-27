@@ -111,9 +111,8 @@ jobs:
           libdouble-conversion-dev libiberty-dev liblz4-dev libssl-dev liblzma-dev \
           libunwind-dev libdwarf-dev libelf-dev libgoogle-glog-dev libgtest-dev \
           libboost-filesystem-dev libboost-program-options-dev libboost-system-dev \
-          libboost-date-time-dev
-#          libboost-context-dev libboost-filesystem-dev libboost-program-options-dev \
-#          libboost-regex-dev libboost-system-dev libboost-thread-dev libarchive-dev
+          libboost-date-time-dev libboost-context-dev libboost-regex-dev
+#libboost-system-dev libboost-thread-dev libarchive-dev
 
       - name: Install libfuse 2 (bionic)
         if: ${{ matrix.os == 'ubuntu-18.04' && matrix.mode == 'full' }}
