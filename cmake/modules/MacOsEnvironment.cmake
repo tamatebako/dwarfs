@@ -36,11 +36,8 @@ if (CMAKE_HOST_SYSTEM_NAME MATCHES "Darwin")
         message(FATAL "Could not find brew setup")
     endif()
     
-    message("Using homebrew environment at ${BREW_PREFIX}")
+    message("Using brew environment at ${BREW_PREFIX}")
 
-    set(CMAKE_PREFIX_PATH "${BREW_PREFIX}")
-    
-    set(ENV{CPATH} "${BREW_PREFIX}/include:$ENV{CPATH}")
 # https://github.com/actions/virtual-environments/blob/main/images/macos/macos-10.15-Readme.md    
     set(ENV{OPENSSL_ROOT_DIR} "${BREW_PREFIX}/opt/openssl@1.1")
 
