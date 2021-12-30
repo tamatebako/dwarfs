@@ -236,7 +236,7 @@ class basic_worker_group final : public worker_group::impl, private Policy {
           ::clock_gettime(cid, &ts) == 0) {
         t += ts.tv_sec + 1e-9 * ts.tv_nsec;
       }
-#endif      
+#endif
     }
     return t;
   }
