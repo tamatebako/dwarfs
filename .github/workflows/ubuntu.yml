@@ -22,9 +22,9 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-# 
+#
 # The purpose of this workflow is to check that build procedures work correctly
-# in specific environment. Due to this reason there is no caching. It is done by 
+# in specific environment. Due to this reason there is no caching. It is done by
 # intention. All caching is in upstream projects.
 #
 # Also this file contains comments that will be useful is dwarfs has to be build
@@ -144,11 +144,11 @@ jobs:
 
       - name: Install libfmt 6 (focal)
         if: ${{ matrix.os == 'ubuntu-20.04' }}
-        run: sudo apt-get install libfmt-dev          
+        run: sudo apt-get install libfmt-dev
 
       - name: Install libjemalloc (not bionic or not clang)
         if: ${{ matrix.os != 'ubuntu-18.04' || matrix.env.CC != 'clang' }}
-        run: sudo apt-get -y install libjemalloc-dev          
+        run: sudo apt-get -y install libjemalloc-dev
 
       - name: Install libjemalloc 5 (bionic and clang)
         if: ${{ matrix.os == 'ubuntu-18.04' && matrix.env.CC == 'clang' }}

@@ -68,4 +68,6 @@ if (CMAKE_HOST_SYSTEM_NAME MATCHES "Darwin")
         message(STATUS "Found Flex keg installed by Homebrew at ${BREW_FLEX_PREFIX}")
         set(FLEX_EXECUTABLE "${BREW_FLEX_PREFIX}/bin/flex")
     endif()
+
+    set(CMAKE_REQUIRED_FLAGS "-Werror=unguarded-availability-new ${CMAKE_REQUIRED_FLAGS}")
 endif()
