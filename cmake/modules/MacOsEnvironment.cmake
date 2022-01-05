@@ -69,8 +69,8 @@ if (CMAKE_HOST_SYSTEM_NAME MATCHES "Darwin")
         set(FLEX_EXECUTABLE "${BREW_FLEX_PREFIX}/bin/flex")
     endif()
 
-    set(CMAKE_REQUIRED_FLAGS "-Werror=unguarded-availability-new ${CMAKE_REQUIRED_FLAGS}")
+#    set(CMAKE_REQUIRED_FLAGS "-Werror=unguarded-availability-new ${CMAKE_REQUIRED_FLAGS}")
 
-    message("SDKROOT = $ENV{SDKROOT}")
-    message("CMAKE_OSX_SYSROOT = ${CMAKE_OSX_SYSROOT}")
+#    message("SDKROOT = $ENV{SDKROOT}")
+#    message("CMAKE_OSX_SYSROOT = ${CMAKE_OSX_SYSROOT}")
 endif()
