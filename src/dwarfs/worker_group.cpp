@@ -232,7 +232,7 @@ class basic_worker_group final : public worker_group::impl, private Policy {
 #else
       ::clockid_t cid;
       struct ::timespec ts;
-      if (pthread_getcpuclockid(std_to_pthread_id(w.get_id()), &cid) == 0 &&
+      if (::pthread_getcpuclockid(std_to_pthread_id(w.get_id()), &cid) == 0 &&
           ::clock_gettime(cid, &ts) == 0) {
         t += ts.tv_sec + 1e-9 * ts.tv_nsec;
       }
