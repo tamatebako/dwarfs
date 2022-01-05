@@ -16,9 +16,9 @@
 # dwarfs.  If not, see <https://www.gnu.org/licenses/>.
 #
 project(dwarfs)
-include(ExternalProject)
-
 cmake_minimum_required(VERSION 3.13.4)
+
+include(ExternalProject)
 
 include(CheckCXXSourceCompiles)
 
@@ -52,13 +52,14 @@ if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
   set(CMAKE_CXX_FLAGS_RELEASE "-DNDEBUG -O2 -g")
 elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
   add_compile_options(-fcolor-diagnostics)
-  if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "11.0.0")
-    # for some reason, clang-10 binaries crash upon throwing exceptions
+  if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "12.0.0")
+  # for some reason, clang-10 and clang-11 binaries crash upon throwing exceptions
     add_compile_options(-fno-omit-frame-pointer)
   endif()
 endif()
 
 include(${CMAKE_SOURCE_DIR}/cmake/version.cmake)
+include(${CMAKE_SOURCE_DIR}/cmake/modules/MacOsEnvironment.cmake)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules")
 
@@ -137,7 +138,7 @@ if(WITH_TESTS)
   find_program(TAR_BIN tar DOC "an archiving utility" REQUIRED)
 endif()
 
-find_program(RONN_EXE ronn DOC "ronn man page generator" REQUIRED)
+find_program(RONN_EXE ronn DOC "ronn man page generator")
 
 if(USE_JEMALLOC)
   find_package(Jemalloc REQUIRED)
@@ -153,6 +154,7 @@ set(compiler_only
 
 add_subdirectory(folly EXCLUDE_FROM_ALL)
 add_subdirectory(fbthrift EXCLUDE_FROM_ALL)
+
 if(NOT (ZSTD_FOUND AND PREFER_SYSTEM_ZSTD))
   add_subdirectory(zstd/build/cmake EXCLUDE_FROM_ALL)
 endif()
@@ -316,23 +318,37 @@ if(WITH_TESTS OR WITH_BENCHMARKS)
 endif()
 
 if(WITH_TESTS)
+  if (FUSE3_FOUND OR FUSE_FOUND)
+    set(WITH_TOOLS_TEST ON)
+  else()
+    set(WITH_TOOLS_TEST OFF)
+  endif()
+
   add_executable(dwarfs_test test/dwarfs.cpp)
   add_executable(dwarfs_compat_test test/dwarfs_compat.cpp)
   add_executable(dwarfs_badfs_test test/dwarfs_badfs.cpp)
-  add_executable(dwarfs_tools_test test/dwarfs_tools.cpp)
+  if(WITH_TOOLS_TEST)
+    add_executable(dwarfs_tools_test test/dwarfs_tools.cpp)
+  endif()
 
   target_link_libraries(dwarfs_test test_helpers gtest gtest_main)
   target_link_libraries(dwarfs_compat_test gtest gtest_main)
   target_link_libraries(dwarfs_badfs_test gtest gtest_main)
-  target_link_libraries(dwarfs_tools_test test_helpers gtest gtest_main)
+  if(WITH_TOOLS_TEST)
+    target_link_libraries(dwarfs_tools_test test_helpers gtest gtest_main)
+  endif()
 
-  list(APPEND BINARY_TARGETS dwarfs_test dwarfs_compat_test dwarfs_badfs_test
-       dwarfs_tools_test)
+  list(APPEND BINARY_TARGETS dwarfs_test dwarfs_compat_test dwarfs_badfs_test)
+  if(WITH_TOOLS_TEST)
+    list(APPEND BINARY_TARGETS dwarfs_tools_test)
+  endif()
 
   gtest_discover_tests(dwarfs_test)
   gtest_discover_tests(dwarfs_compat_test)
   gtest_discover_tests(dwarfs_badfs_test)
-  gtest_discover_tests(dwarfs_tools_test)
+  if(WITH_TOOLS_TEST)
+    gtest_discover_tests(dwarfs_tools_test)
+  endif()
 
   target_compile_definitions(dwarfs_compat_test
                              PRIVATE TEST_DATA_DIR=\"${CMAKE_SOURCE_DIR}/test\")
@@ -340,11 +356,13 @@ if(WITH_TESTS)
   target_compile_definitions(dwarfs_badfs_test
                              PRIVATE TEST_DATA_DIR=\"${CMAKE_SOURCE_DIR}/test\")
 
-  target_compile_definitions(
-    dwarfs_tools_test
-    PRIVATE TEST_DATA_DIR=\"${CMAKE_SOURCE_DIR}/test\"
-            TOOLS_BIN_DIR=\"${CMAKE_CURRENT_BINARY_DIR}\"
-            DIFF_BIN=\"${DIFF_BIN}\" TAR_BIN=\"${TAR_BIN}\")
+  if(WITH_TOOLS_TEST)
+    target_compile_definitions(
+      dwarfs_tools_test
+      PRIVATE TEST_DATA_DIR=\"${CMAKE_SOURCE_DIR}/test\"
+              TOOLS_BIN_DIR=\"${CMAKE_CURRENT_BINARY_DIR}\"
+              DIFF_BIN=\"${DIFF_BIN}\" TAR_BIN=\"${TAR_BIN}\")
+  endif()
 endif()
 
 if(WITH_BENCHMARKS)
@@ -354,36 +372,40 @@ if(WITH_BENCHMARKS)
   list(APPEND BINARY_TARGETS dwarfs_benchmark)
 endif()
 
-foreach(man dwarfs.1 mkdwarfs.1 dwarfsck.1 dwarfsextract.1 dwarfs-format.5)
-  string(REGEX MATCH "^[^.]*" docname "${man}")
-  string(REGEX MATCH "[^.]*$" section "${man}")
-  set(man_dir "${CMAKE_CURRENT_BINARY_DIR}/man${section}")
-  set(man_input "${CMAKE_CURRENT_SOURCE_DIR}/doc/${docname}.md")
-  set(man_output "${man_dir}/${man}")
+if(RONN_EXE_FOUND)
+  foreach(man dwarfs.1 mkdwarfs.1 dwarfsck.1 dwarfsextract.1 dwarfs-format.5)
+    string(REGEX MATCH "^[^.]*" docname "${man}")
+    string(REGEX MATCH "[^.]*$" section "${man}")
+    set(man_dir "${CMAKE_CURRENT_BINARY_DIR}/man${section}")
+    set(man_input "${CMAKE_CURRENT_SOURCE_DIR}/doc/${docname}.md")
+    set(man_output "${man_dir}/${man}")
 
-  execute_process(
-    COMMAND ${RONN_EXE}
-    INPUT_FILE "${man_input}"
-    RESULT_VARIABLE ronn_result
-    OUTPUT_VARIABLE ronn_output
-    ERROR_VARIABLE ronn_error)
+    execute_process(
+      COMMAND ${RONN_EXE}
+      INPUT_FILE "${man_input}"
+      RESULT_VARIABLE ronn_result
+      OUTPUT_VARIABLE ronn_output
+      ERROR_VARIABLE ronn_error)
 
-  if(${ronn_result} EQUAL 0)
-    add_custom_command(
-      OUTPUT "${man_output}"
-      COMMAND mkdir -p "${man_dir}"
-      COMMAND ${RONN_EXE} <"${man_input}" >"${man_output}"
-      DEPENDS "${man_input}")
-    list(APPEND MAN_PAGES "${man_output}")
-    list(APPEND MAN_DIRS "${man_dir}")
-  else()
-    message(WARNING "${RONN_EXE} failed to process ${man}")
-  endif()
-endforeach()
+    if(${ronn_result} EQUAL 0)
+      add_custom_command(
+        OUTPUT "${man_output}"
+        COMMAND mkdir -p "${man_dir}"
+        COMMAND ${RONN_EXE} <"${man_input}" >"${man_output}"
+        DEPENDS "${man_input}")
+      list(APPEND MAN_PAGES "${man_output}")
+      list(APPEND MAN_DIRS "${man_dir}")
+    else()
+      message(WARNING "${RONN_EXE} failed to process ${man}")
+    endif()
+  endforeach()
 
-list(REMOVE_DUPLICATES MAN_DIRS)
-add_custom_target(manpages DEPENDS ${MAN_PAGES})
-add_dependencies(mkdwarfs manpages)
+  list(REMOVE_DUPLICATES MAN_DIRS)
+  add_custom_target(manpages DEPENDS ${MAN_PAGES})
+  add_dependencies(mkdwarfs manpages)
+else()
+  message(WARNING "ronn was not found, skipping generation of manpages")
+endif()
 
 list(
   APPEND
