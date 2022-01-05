@@ -69,8 +69,11 @@ if (CMAKE_HOST_SYSTEM_NAME MATCHES "Darwin")
         set(FLEX_EXECUTABLE "${BREW_FLEX_PREFIX}/bin/flex")
     endif()
 
+# Suppress superfluous randlib warnings about "*.a" having no symbols on MacOSX.
+	set(CMAKE_C_ARCHIVE_CREATE   "<CMAKE_AR> Scr <TARGET> <LINK_FLAGS> <OBJECTS>")
+	set(CMAKE_CXX_ARCHIVE_CREATE "<CMAKE_AR> Scr <TARGET> <LINK_FLAGS> <OBJECTS>")
+	set(CMAKE_C_ARCHIVE_FINISH   "<CMAKE_RANLIB> -no_warning_for_no_symbols -c <TARGET>")
+	set(CMAKE_CXX_ARCHIVE_FINISH "<CMAKE_RANLIB> -no_warning_for_no_symbols -c <TARGET>")
+    
 #    set(CMAKE_REQUIRED_FLAGS "-Werror=unguarded-availability-new ${CMAKE_REQUIRED_FLAGS}")
-
-#    message("SDKROOT = $ENV{SDKROOT}")
-#    message("CMAKE_OSX_SYSROOT = ${CMAKE_OSX_SYSROOT}")
 endif()
