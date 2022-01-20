@@ -11,6 +11,8 @@
 
 # VS build environment
 .vs/
+.vscode/
 out/
 CMakeSettings.json
 fbthrift/
+jemalloc/
