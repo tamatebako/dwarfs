@@ -15,8 +15,10 @@
 # You should have received a copy of the GNU General Public License along with
 # dwarfs.  If not, see <https://www.gnu.org/licenses/>.
 #
-project(dwarfs)
 cmake_minimum_required(VERSION 3.13.4)
+
+cmake_policy(SET CMP0048 NEW)
+project(tebako-dwarfs VERSION 0.1.7)
 
 include(ExternalProject)
 
@@ -37,6 +39,21 @@ option(PREFER_SYSTEM_GTEST "use system gtest if available" OFF)
 option(STATIC_BUILD_DO_NOT_USE "try static build (experimental)" OFF)
 
 set(default_build_type "Release")
+
+if(NOT TEBAKO_BUILD_SCOPE)
+  set(TEBAKO_BUILD_SCOPE "ALL")
+  message(STATUS "Tebako build scope is not specified and has been set to ALL")
+endif()
+if((WITH_TESTS OR WITH_BENCHMARKS) AND NOT "${TEBAKO_BUILD_SCOPE}" STREQUAL "ALL" )
+  set(TEBAKO_BUILD_SCOPE "ALL")
+  message(STATUS "WITH_TESTS or WITH_BENCHMARKS option was specified. Tebako build scope has been forcefully set to ALL")
+endif()
+if(NOT "${TEBAKO_BUILD_SCOPE}" STREQUAL "ALL" AND
+   NOT "${TEBAKO_BUILD_SCOPE}" STREQUAL "MKD" AND
+   NOT "${TEBAKO_BUILD_SCOPE}" STREQUAL "LIB")
+   message(STATUS "Unknown build scope setting ${TEBAKO_BUILD_SCOPE}. Tebako build scope has been forcefully set to ALL")
+   set(TEBAKO_BUILD_SCOPE "ALL")
+endif()
 
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   message(STATUS "Setting build type to '${default_build_type}'")
@@ -276,38 +293,45 @@ if(STATIC_BUILD_DO_NOT_USE)
   add_link_options(-static -static-libgcc)
 endif(STATIC_BUILD_DO_NOT_USE)
 
-add_executable(mkdwarfs src/mkdwarfs.cpp)
-add_executable(dwarfsck src/dwarfsck.cpp)
-add_executable(dwarfsbench src/dwarfsbench.cpp)
-add_executable(dwarfsextract src/dwarfsextract.cpp)
-
-list(APPEND BINARY_TARGETS mkdwarfs dwarfsck dwarfsbench dwarfsextract)
-
-if(FUSE3_FOUND)
-  add_executable(dwarfs-bin src/dwarfs.cpp)
-  target_compile_definitions(dwarfs-bin PRIVATE _FILE_OFFSET_BITS=64
-                                                FUSE_USE_VERSION=35)
-  set_target_properties(dwarfs-bin PROPERTIES OUTPUT_NAME dwarfs)
-  target_link_libraries(dwarfs-bin PkgConfig::FUSE3)
-  add_custom_target(mount.dwarfs ALL COMMAND ${CMAKE_COMMAND} -E create_symlink
-                                             dwarfs mount.dwarfs)
-  install(TARGETS dwarfs-bin RUNTIME DESTINATION sbin)
-  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/mount.dwarfs DESTINATION sbin)
-  list(APPEND BINARY_TARGETS dwarfs-bin)
+if("${TEBAKO_BUILD_SCOPE}" STREQUAL "ALL" OR
+   "${TEBAKO_BUILD_SCOPE}" STREQUAL "MKD")
+   add_executable(mkdwarfs src/mkdwarfs.cpp)
+   list(APPEND BINARY_TARGETS mkdwarfs)
 endif()
 
-if(FUSE_FOUND AND (WITH_LEGACY_FUSE OR NOT FUSE3_FOUND))
-  add_executable(dwarfs2-bin src/dwarfs.cpp)
-  target_compile_definitions(dwarfs2-bin PRIVATE _FILE_OFFSET_BITS=64
+if("${TEBAKO_BUILD_SCOPE}" STREQUAL "ALL")
+  add_executable(dwarfsck src/dwarfsck.cpp)
+  add_executable(dwarfsbench src/dwarfsbench.cpp)
+  add_executable(dwarfsextract src/dwarfsextract.cpp)
+
+  list(APPEND BINARY_TARGETS mkdwarfs dwarfsck dwarfsbench dwarfsextract)
+
+  if(FUSE3_FOUND)
+    add_executable(dwarfs-bin src/dwarfs.cpp)
+    target_compile_definitions(dwarfs-bin PRIVATE _FILE_OFFSET_BITS=64
+                                                  FUSE_USE_VERSION=35)
+    set_target_properties(dwarfs-bin PROPERTIES OUTPUT_NAME dwarfs)
+    target_link_libraries(dwarfs-bin PkgConfig::FUSE3)
+    add_custom_target(mount.dwarfs ALL COMMAND ${CMAKE_COMMAND} -E create_symlink
+                                             dwarfs mount.dwarfs)
+    install(TARGETS dwarfs-bin RUNTIME DESTINATION sbin)
+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/mount.dwarfs DESTINATION sbin)
+    list(APPEND BINARY_TARGETS dwarfs-bin)
+  endif()
+
+  if(FUSE_FOUND AND (WITH_LEGACY_FUSE OR NOT FUSE3_FOUND))
+    add_executable(dwarfs2-bin src/dwarfs.cpp)
+    target_compile_definitions(dwarfs2-bin PRIVATE _FILE_OFFSET_BITS=64
                                                  FUSE_USE_VERSION=29)
-  set_target_properties(dwarfs2-bin PROPERTIES OUTPUT_NAME dwarfs2)
-  target_link_libraries(dwarfs2-bin PkgConfig::FUSE)
-  add_custom_target(
-    mount.dwarfs2 ALL COMMAND ${CMAKE_COMMAND} -E create_symlink dwarfs2
-                              mount.dwarfs2)
-  install(TARGETS dwarfs2-bin RUNTIME DESTINATION sbin)
-  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/mount.dwarfs2 DESTINATION sbin)
-  list(APPEND BINARY_TARGETS dwarfs2-bin)
+    set_target_properties(dwarfs2-bin PROPERTIES OUTPUT_NAME dwarfs2)
+    target_link_libraries(dwarfs2-bin PkgConfig::FUSE)
+    add_custom_target(
+      mount.dwarfs2 ALL COMMAND ${CMAKE_COMMAND} -E create_symlink dwarfs2
+                                mount.dwarfs2)
+    install(TARGETS dwarfs2-bin RUNTIME DESTINATION sbin)
+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/mount.dwarfs2 DESTINATION sbin)
+    list(APPEND BINARY_TARGETS dwarfs2-bin)
+  endif()
 endif()
 
 if(WITH_TESTS OR WITH_BENCHMARKS)
@@ -490,14 +514,6 @@ if(USE_JEMALLOC)
   list(APPEND INCLUDE_DIRS ${Jemalloc_INCLUDE_DIRS})
 endif()
 
-set(DWARFS_USE_EXCEPTION_TRACER OFF)
-# [tebako TODO]
-#if(NOT STATIC_BUILD_DO_NOT_USE)
-#  if(TARGET folly_exception_tracer)
-#    set(DWARFS_USE_EXCEPTION_TRACER ON)
-#  endif()
-#endif()
-
 add_library(
   thrift_light
   ${CMAKE_CURRENT_SOURCE_DIR}/fbthrift/thrift/lib/cpp2/FieldRef.cpp
@@ -547,10 +563,6 @@ foreach(tgt dwarfs ${BINARY_TARGETS})
             $<$<BOOL:${LIBLZ4_FOUND}>:DWARFS_HAVE_LIBLZ4>
             $<$<BOOL:${LIBLZMA_FOUND}>:DWARFS_HAVE_LIBLZMA>
             $<$<BOOL:${WITH_PYTHON}>:DWARFS_HAVE_PYTHON>)
-
-  if(DWARFS_USE_EXCEPTION_TRACER)
-    target_compile_definitions(${tgt} PRIVATE DWARFS_USE_EXCEPTION_TRACER)
-  endif()
 
   target_compile_options(${tgt} PRIVATE -Wall -Wextra -pedantic)
 
@@ -642,11 +654,6 @@ foreach(tgt ${BINARY_TARGETS})
   if(USE_JEMALLOC)
     target_link_libraries(${tgt} ${Jemalloc_LIBRARIES})
   endif(USE_JEMALLOC)
-  if(DWARFS_USE_EXCEPTION_TRACER)
-    target_link_libraries(
-      ${tgt} -Wl,--whole-archive folly_exception_tracer_base
-      folly_exception_tracer -Wl,--no-whole-archive)
-  endif()
 endforeach()
 
 if(STATIC_BUILD_DO_NOT_USE)
@@ -698,6 +705,7 @@ if(STATIC_BUILD_DO_NOT_USE)
                -DCMAKE_BUILD_TYPE=Release
                -DENABLE_ICONV:BOOL=OFF
                -DENABLE_LIBXML2:BOOL=OFF
+               -DENABLE_TEST:BOOL=OFF
     BUILD_BYPRODUCTS ${__LIBARCHIVE}
     TMP_DIR "${PROJECT_BINARY_DIR}/libarchive/tmp"
     STAMP_DIR "${PROJECT_BINARY_DIR}/libarchive/stamp"
@@ -768,11 +776,7 @@ if(STATIC_BUILD_DO_NOT_USE)
       static_libpthread
       static_libdl
       static_libz
-      static_libc
-      static_libm
-      static_librt
-      gcc_eh
-      static_libunwind)
+      )
   endforeach()
 endif(STATIC_BUILD_DO_NOT_USE)
 
