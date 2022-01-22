@@ -25,21 +25,26 @@
 #
 
 if (CMAKE_HOST_SYSTEM_NAME MATCHES "Darwin")
+    if(NOT BREW_BIN)
+      set(BREW_BIN brew)
+    endif()
     execute_process(
-        COMMAND brew --prefix
+        COMMAND ${BREW_BIN} --prefix
         RESULT_VARIABLE BREW_PREFIX_RES
         OUTPUT_VARIABLE BREW_PREFIX
         OUTPUT_STRIP_TRAILING_WHITESPACE
     )
+    
     if(NOT (BREW_PREFIX_RES EQUAL 0 AND EXISTS ${BREW_PREFIX}))
         message(FATAL "Could not find brew setup")
     endif()
-    
+
     message("Using brew environment at ${BREW_PREFIX}")
 
 # https://github.com/actions/virtual-environments/blob/main/images/macos/macos-10.15-Readme.md    
     set(ENV{OPENSSL_ROOT_DIR} "${BREW_PREFIX}/opt/openssl@1.1")
 
+    set(CMAKE_PREFIX_PATH ${BREW_PREFIX})
     include_directories("${BREW_PREFIX}/include")
 
 # libarchive is keg-only, which means it was not symlinked into /usr/local,

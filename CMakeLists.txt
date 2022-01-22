@@ -189,14 +189,14 @@ if(WITH_TESTS)
     FetchContent_Declare(
       googletest
       GIT_REPOSITORY https://github.com/google/googletest.git
-      GIT_TAG        v1.11.0 
+      GIT_TAG        release-1.11.0
     )
     # Prevent overriding the parent project's compiler/linker settings on Windows
     set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
     # Do not build Gmock
     set(BUILD_GMOCK OFF CACHE INTERNAL "")    
     FetchContent_MakeAvailable(googletest)
-.  endif()
+  endif()
 
   enable_testing()
   include(GoogleTest)
