@@ -60,7 +60,6 @@ jobs:
   build:
     name: ${{ matrix.setup.os }} [${{ matrix.scope }}]
     runs-on: ${{ matrix.setup.os }}
-    env: ${{ matrix.setup.env }}
     strategy:
       fail-fast: false
       matrix:          
