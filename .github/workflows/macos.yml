@@ -70,11 +70,11 @@ jobs:
             scope: ALL
           - version: '10.15'
             xcode: '12.1.1'
-            target: x86_64
+            target: arm64
             scope: MKD
           - version: '10.15'
             xcode: '12.1.1'
-            target: x86_64
+            target: x86-64
             scope: LIB
           - version: '11.0'
             xcode: '12.4'
@@ -82,7 +82,7 @@ jobs:
             scope: ALL
           - version: '11.0'
             xcode: '12.4'
-            target: x86_64
+            target: arm64
             scope: MKD
           - version: '11.0'
             xcode: '12.4'
@@ -136,3 +136,10 @@ jobs:
         run: |
           cd build
           make test
+
+      - name: Architecture check
+        if: ${{ matrix.setup.scope != 'LIB' }}      
+        run: |
+          lipo mkdwarfs --info
+          lipo mkdwarfs --info | grep -i ${{ matrix.setup.target }}
+          
