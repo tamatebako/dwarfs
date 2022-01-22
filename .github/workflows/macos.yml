@@ -63,7 +63,8 @@ jobs:
     runs-on: ${{ matrix.setup.os }}
     strategy:
       fail-fast: false
-      matrix:          
+      matrix:    
+        dummy: ['aaa']      
         include:
           - os: macos-10.15
             xcode: '12.1.1'
