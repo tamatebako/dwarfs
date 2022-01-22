@@ -57,7 +57,7 @@ env:
 
 jobs:
   build:
-    name: ${{ matrix.setup.os }} [${{ matrix.scope }}]
+    name: ${{ matrix.setup.os }} [${{ matrix.setup.scope }}]
     env: ${{ matrix.setup.env }}
     runs-on: ${{ matrix.setup.os }}
     strategy:
@@ -67,17 +67,17 @@ jobs:
           - os: macos-10.15
             xcode: '12.1.1'
             env:
-             CXXFLAGS: -std=gnu++14 -DTARGET_OS_SIMULATOR=0 -DTARGET_OS_IPHONE=0 --target=x86_64-apple-macos10.15
+              CXXFLAGS: -std=gnu++14 -DTARGET_OS_SIMULATOR=0 -DTARGET_OS_IPHONE=0 --target=x86_64-apple-macos10.15
             scope: ALL
           - os: macos-10.15
             xcode: '12.1.1'
             env:
-             CXXFLAGS: -std=gnu++14 -DTARGET_OS_SIMULATOR=0 -DTARGET_OS_IPHONE=0 --target=arm64-apple-macos10.15
+              CXXFLAGS: -std=gnu++14 -DTARGET_OS_SIMULATOR=0 -DTARGET_OS_IPHONE=0 --target=arm64-apple-macos10.15
             scope: MKD
           - os: macos-10.15
             xcode: '12.1.1'
             env:
-             CXXFLAGS: -std=gnu++14 -DTARGET_OS_SIMULATOR=0 -DTARGET_OS_IPHONE=0 --target=x86_64-apple-macos10.15
+              CXXFLAGS: -std=gnu++14 -DTARGET_OS_SIMULATOR=0 -DTARGET_OS_IPHONE=0 --target=x86_64-apple-macos10.15
             scope: LIB
           - os: macos-11.0
             xcode: '12.4'
