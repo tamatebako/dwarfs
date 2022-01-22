@@ -76,7 +76,7 @@ jobs:
     steps:
 
       - name: Set target
-        run:  echo "--target=${{ matrix.setup.target }} $CXXFLAGS1" >> $CXXFLAGS
+        run:  echo "CXXFLAGS=--target=${{ matrix.setup.target }} $CXXFLAGS1" >> $GITHUB_ENV
 
       - name: Select XCode and SDK
         uses: maxim-lobanov/setup-xcode@v1
