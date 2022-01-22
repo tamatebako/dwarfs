@@ -1,4 +1,4 @@
-# Copyright (c) 2021, [Ribose Inc](https://www.ribose.com).
+# Copyright (c) 2021-2022, [Ribose Inc](https://www.ribose.com).
 # All rights reserved.
 # This file is a part of tamatebako
 #
@@ -51,7 +51,7 @@ on:
 env:
   MAKEFLAGS: -j4
 # Ruby  (this is required for ronn)
-  RUBY_VER:   "2.7.4"
+  RUBY_VER:   "2.7.5"
 
 jobs:
   build:
@@ -109,7 +109,7 @@ jobs:
           sudo apt-get -y install \
           binutils-dev libarchive-dev libevent-dev acl-dev libarchive-dev \
           libdouble-conversion-dev libiberty-dev liblz4-dev libssl-dev liblzma-dev \
-          libunwind-dev libdwarf-dev libelf-dev libgoogle-glog-dev libgtest-dev \
+          libunwind-dev libdwarf-dev libelf-dev libgoogle-glog-dev \
           libboost-filesystem-dev libboost-program-options-dev libboost-system-dev \
           libboost-date-time-dev libboost-context-dev libboost-regex-dev libboost-thread-dev
 
