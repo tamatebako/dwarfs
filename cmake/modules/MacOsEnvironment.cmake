@@ -1,4 +1,4 @@
-# Copyright (c) 2021, [Ribose Inc](https://www.ribose.com).
+# Copyright (c) 2021-2022, [Ribose Inc](https://www.ribose.com).
 # All rights reserved.
 # This file is a part of tamatebako
 #
@@ -24,7 +24,6 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
-
 if (CMAKE_HOST_SYSTEM_NAME MATCHES "Darwin")
     execute_process(
         COMMAND brew --prefix
@@ -40,6 +39,8 @@ if (CMAKE_HOST_SYSTEM_NAME MATCHES "Darwin")
 
 # https://github.com/actions/virtual-environments/blob/main/images/macos/macos-10.15-Readme.md    
     set(ENV{OPENSSL_ROOT_DIR} "${BREW_PREFIX}/opt/openssl@1.1")
+
+    include_directories("${BREW_PREFIX}/include")
 
 # libarchive is keg-only, which means it was not symlinked into /usr/local,
 # because macOS already provides this software and installing another version in
