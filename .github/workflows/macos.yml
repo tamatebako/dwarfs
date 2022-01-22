@@ -101,11 +101,15 @@ jobs:
       - name: Install packages
 # Already installed: pkg-config, openssl@1.1, libevent, libsodium, lz4, xz
 # Not installing [if ubuntu is considered the baseline] libiberty, libunwind, libdwarf, libelf
+# --
+#          brew install --build-bottle --bottle-arch=${{ matrix.setup.target }} boost
         run: |
-          brew install --build-bottle --bottle-arch=${{ matrix.setup.target }} boost
+          arch -${{ matrix.setup.target }} brew install boost
           brew install  \
           bison flex binutils libarchive double-conversion jemalloc fmt \
           glog
+          ls /opt/homebrew/lib || true
+          ls /opt/homebrew/include || true
 
       - name: Configure with tests
         if: ${{ matrix.setup.scope == 'ALL' }}
