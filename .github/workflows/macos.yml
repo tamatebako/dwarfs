@@ -66,7 +66,7 @@ jobs:
       matrix:    
         dummy: ['aaa']      
         include:
-          - os: macos-10.15
+          - os: 'macos-10.15'
             xcode: '12.1.1'
 #            env:
 #              CXXFLAGS: -std=gnu++14 -DTARGET_OS_SIMULATOR=0 -DTARGET_OS_IPHONE=0 --target=x86_64-apple-macos10.15
