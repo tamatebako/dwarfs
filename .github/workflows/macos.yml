@@ -64,22 +64,22 @@ jobs:
       fail-fast: false
       matrix:          
         setup:
-          - version: '10.15'
-            xcode: '12.1.1'
-            target: x86_64
-            scope: ALL
-          - version: '11.0'
-            xcode: '12.4'
-            target: x86_64
-            scope: ALL
+#          - version: '10.15'
+#            xcode: '12.1.1'
+#            target: x86_64
+#            scope: ALL
+#          - version: '11.0'
+#            xcode: '12.4'
+#            target: x86_64
+#            scope: ALL
           - version: '11.0'
             xcode: '12.4'
             target: arm64
             scope: MKD
-          - version: '11.0'
-            xcode: '12.4'
-            target: x86_64
-            scope: LIB
+#          - version: '11.0'
+#            xcode: '12.4'
+#            target: x86_64
+#            scope: LIB
 
     steps:
 
@@ -102,14 +102,13 @@ jobs:
 # Already installed: pkg-config, openssl@1.1, libevent, libsodium, lz4, xz
 # Not installing [if ubuntu is considered the baseline] libiberty, libunwind, libdwarf, libelf
 # --
-#          brew install --build-bottle --bottle-arch=${{ matrix.setup.target }} boost
         run: |
-          arch -${{ matrix.setup.target }} brew install boost
+          brew install --build-bottle --bottle-arch=${{ matrix.setup.target }} boost
+          ls /opt/homebrew/lib || true
+          ls /opt/homebrew/include || true
           brew install  \
           bison flex binutils libarchive double-conversion jemalloc fmt \
           glog
-          ls /opt/homebrew/lib || true
-          ls /opt/homebrew/include || true
 
       - name: Configure with tests
         if: ${{ matrix.setup.scope == 'ALL' }}
