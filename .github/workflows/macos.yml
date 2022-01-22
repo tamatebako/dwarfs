@@ -68,11 +68,11 @@ jobs:
           - os: macos-10.15
             xcode: '12.1.1'
             env:
-              CXXFLAGS: ${{ github.env.CXXFLAGS1}}
+              CXXFLAGS: --target x86_64-apple-macos10.12 ${{ env.CXXFLAGS1}}
           - os: macos-11.0
             xcode: '12.4'
             env:
-              CXXFLAGS: ${{ github.env.CXXFLAGS1}}           
+              CXXFLAGS: --target x86_64-apple-macos10.12 ${{ env.CXXFLAGS1}}           
             
         scope: [ ALL, MKD, LIB ]
 
