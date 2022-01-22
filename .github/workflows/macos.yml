@@ -102,7 +102,7 @@ jobs:
 # Already installed: pkg-config, openssl@1.1, libevent, libsodium, lz4, xz
 # Not installing [if ubuntu is considered the baseline] libiberty, libunwind, libdwarf, libelf
         run: |
-          brew install --bottle-arch=${{ matrix.setup.target }} boost
+          brew install --build-bottle --bottle-arch=${{ matrix.setup.target }} boost
           brew install  \
           bison flex binutils libarchive double-conversion jemalloc fmt \
           glog
