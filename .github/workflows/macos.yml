@@ -68,14 +68,6 @@ jobs:
             xcode: '12.1.1'
             target: x86_64
             scope: ALL
-          - version: '10.15'
-            xcode: '12.1.1'
-            target: arm64
-            scope: MKD
-          - version: '10.15'
-            xcode: '12.1.1'
-            target: x86-64
-            scope: LIB
           - version: '11.0'
             xcode: '12.4'
             target: x86_64
@@ -92,7 +84,9 @@ jobs:
     steps:
 
       - name: Set target
-        run:  echo "CXXFLAGS=--target=${{ matrix.setup.target }}-apple-macos${{ matrix.setup.version }} $CXXFLAGS" >> $GITHUB_ENV
+        run:  |
+          echo "CXXFLAGS=--target=${{ matrix.setup.target }}-apple-macos${{ matrix.setup.version }} $CXXFLAGS" >> $GITHUB_ENV
+          echo "ARCHFLAGS=-arch ${{ matrix.setup.target }}" >> $GITHUB_ENV
 
       - name: Select XCode and SDK
         uses: maxim-lobanov/setup-xcode@v1
