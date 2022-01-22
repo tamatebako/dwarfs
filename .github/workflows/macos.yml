@@ -102,8 +102,7 @@ jobs:
 # Already installed: pkg-config, openssl@1.1, libevent, libsodium, lz4, xz
 # Not installing [if ubuntu is considered the baseline] libiberty, libunwind, libdwarf, libelf
         run: |
-          brew reinstall boost
-          brew install \
+          arch -${{ matrix.setup.target }} brew install \
           bison flex binutils libarchive double-conversion boost jemalloc fmt \
           glog
 
@@ -135,6 +134,6 @@ jobs:
       - name: Architecture check
         if: ${{ matrix.setup.scope != 'LIB' }}      
         run: |
-          lipo mkdwarfs --info
-          lipo mkdwarfs --info | grep -i ${{ matrix.setup.target }}
+          lipo mkdwarfs -info
+          lipo mkdwarfs -info | grep -i ${{ matrix.setup.target }}
           
