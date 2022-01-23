@@ -98,9 +98,6 @@ jobs:
 
       - name: Install packages
         run: |
-          brew install --build-bottle --bottle-arch=${{ matrix.setup.target }} boost
-          ls /opt/homebrew/lib || true
-          ls /opt/homebrew/include || true
           brew install  \
           bison flex binutils boost libarchive double-conversion jemalloc fmt glog
 

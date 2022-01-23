@@ -93,17 +93,16 @@ jobs:
           brew install bison flex binutils 
 
       - name: Install more packages
-# Already installed: pkg-config, openssl@1.1, libevent, libsodium, lz4, xz
-# Not installing [if ubuntu is considered the baseline] libiberty, libunwind, libdwarf, libelf
         run: |
-          ./arm-brew-setup.sh ${{ github.workspace }}
-          ./arm-brew-install.sh ${{ github.workspace }} libarchive double-conversion boost jemalloc fmt glog openssl@1.1 libevent libsodium lz4 xz
+          ./arm-brew-setup.sh ${{ github.workspace }}/..
+          ./arm-brew-install.sh ${{ github.workspace }}/.. libarchive double-conversion \
+                                boost jemalloc fmt glog openssl@1.1 libevent libsodium lz4 xz
 
       - name: Configure
         run: |
           mkdir build
           cd build
-          cmake .. -DBREW_BIN=${{ github.workspace }}/arm-homebrew/bin/brew
+          cmake .. -DBREW_BIN=${{ github.workspace }}/../arm-homebrew/bin/brew
                    -DWITH_TESTS=${{ matrix.setup.tests }} \
                    -DTEBAKO_BUILD_SCOPE=${{ matrix.setup.scope }} \
                    -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/install
