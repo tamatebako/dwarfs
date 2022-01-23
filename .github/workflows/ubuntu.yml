@@ -38,14 +38,16 @@ on:
       - 'docs/**'
       - '**.adoc'
       - '**.md'
-      - '.github/workflows/macos.yml'
+      - '.github/workflows/*.yml'      
+      - '.github/workflows/ubuntu.yml'
   pull_request:
     branches: [ libdwarfs_wr* ]
     paths-ignore:
       - 'docs/**'
       - '**.adoc'
       - '**.md'
-      - '.github/workflows/macos.yml'
+      - '.github/workflows/*.yml'
+      - '!.github/workflows/ubuntu.yml'
   workflow_dispatch:
 
 env:
