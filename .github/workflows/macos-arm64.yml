@@ -102,7 +102,7 @@ jobs:
         run: |
           mkdir build
           cd build
-          cmake .. -DBREW_BIN=${{ github.workspace }}/../arm-homebrew/bin/brew
+          cmake .. -DBREW_BIN=${{ github.workspace }}/../arm-homebrew/bin/brew \
                    -DWITH_TESTS=${{ matrix.setup.tests }} \
                    -DTEBAKO_BUILD_SCOPE=${{ matrix.setup.scope }} \
                    -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/install
