@@ -69,7 +69,7 @@ jobs:
             target: x86_64
             scope: ALL
             tests: 'ON'
-           - version: '10.15'
+          - version: '10.15'
             xcode: '12.1.1'
             target: x86_64
             scope: MKD
