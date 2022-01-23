@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022, [Ribose Inc](https://www.ribose.com).
+# Copyright (c) 2022, [Ribose Inc](https://www.ribose.com).
 # All rights reserved.
 # This file is a part of tamatebako
 #
@@ -29,7 +29,7 @@
 #
 # Also this file contains comments that will be useful is dwarfs has to be build
 # in different environment, not GHA.
-name: MacOS
+name: MacOS-arm64
 
 on:
   push:
@@ -39,7 +39,7 @@ on:
       - '**.adoc'
       - '**.md'
       - '.github/workflows/*.yml'
-      - '!.github/workflows/macos.yml'
+      - '!.github/workflows/macos-arm64.yml'
   pull_request:
     branches: [ libdwarfs_wr* ]
     paths-ignore:
@@ -47,7 +47,7 @@ on:
       - '**.adoc'
       - '**.md'
       - '.github/workflows/*.yml'
-      - '!.github/workflows/macos.yml'
+      - '!.github/workflows/macos-arm64.yml'
   workflow_dispatch:
 
 env:
@@ -64,28 +64,18 @@ jobs:
       fail-fast: false
       matrix:          
         setup:
-          - version: '10.15'
-            xcode: '12.1.1'
-            target: x86_64
-            scope: ALL
-            tests: 'ON'
-           - version: '10.15'
-            xcode: '12.1.1'
-            target: x86_64
-            scope: MKD
-            tests: 'OFF'
           - version: '11.0'
             xcode: '12.4'
-            target: x86_64
-            scope: ALL
-            tests: 'ON'
-          - version: '11.0'
-            xcode: '12.4'
-            target: x86_64
-            scope: MKD
+            target: arm64
+            scope: LIB
             tests: 'OFF'
 
     steps:
+
+      - name: Set target
+        run:  |
+          echo "CXXFLAGS=--target=${{ matrix.setup.target }}-apple-macos${{ matrix.setup.version }} $CXXFLAGS" >> $GITHUB_ENV
+
       - name: Select XCode and SDK
         uses: maxim-lobanov/setup-xcode@v1
         with:
@@ -97,12 +87,19 @@ jobs:
           submodules: true
 
       - name: Install packages
+# Already installed: pkg-config, openssl@1.1, libevent, libsodium, lz4, xz
+# Not installing [if ubuntu is considered the baseline] libiberty, libunwind, libdwarf, libelf
         run: |
-          brew install --build-bottle --bottle-arch=${{ matrix.setup.target }} boost
-          ls /opt/homebrew/lib || true
-          ls /opt/homebrew/include || true
-          brew install  \
-          bison flex binutils boost libarchive double-conversion jemalloc fmt glog
+          brew install -s \
+          bison flex binutils libarchive double-conversion boost jemalloc fmt \
+          glog
+
+      - name: Install more packages
+# Already installed: pkg-config, openssl@1.1, libevent, libsodium, lz4, xz
+# Not installing [if ubuntu is considered the baseline] libiberty, libunwind, libdwarf, libelf
+        run: |
+          ./arm-brew-setup ${{ github.workspace }}
+          ./arm-brew-install ${{ github.workspace }} libarchive double-conversion boost jemalloc fmt glog openssl@1.1 libevent libsodium lz4 xz
 
       - name: Configure
         run: |
@@ -110,14 +107,15 @@ jobs:
           cd build
           cmake .. -DWITH_TESTS=${{ matrix.setup.tests }} -DTEBAKO_BUILD_SCOPE=${{ matrix.setup.scope }} -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/install
 
-      - name: Build
-        run: |
-          cd build
-          make -j4
+#      - name: Build
+#        run: |
+#          cd build
+#          make -j4
 
-      - name: Test
-        if: ${{ matrix.setup.tests == 'ON' }}
-        run: |
-          cd build
-          make test
-          
+#      - name: Test
+#        if: ${{ matrix.setup.scope == 'ALL' }}
+#        run: |
+#          cd build
+#          make test
+
+.
