@@ -107,10 +107,10 @@ jobs:
                    -DTEBAKO_BUILD_SCOPE=${{ matrix.setup.scope }} \
                    -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/install
 
-#      - name: Build
-#        run: |
-#          cd build
-#          make -j4
+      - name: Build
+        run: |
+          cd build
+          make -j4
 
 #      - name: Test
 #        if: ${{ matrix.setup.scope == 'ALL' }}

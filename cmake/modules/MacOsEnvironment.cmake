@@ -54,7 +54,7 @@ if (CMAKE_HOST_SYSTEM_NAME MATCHES "Darwin")
 
 #  https://stackoverflow.com/questions/53877344/cannot-configure-cmake-to-look-for-homebrew-installed-version-of-bison
     execute_process(
-        COMMAND ${BREW_BIN} --prefix bison
+        COMMAND brew --prefix bison
         RESULT_VARIABLE BREW_BISON
         OUTPUT_VARIABLE BREW_BISON_PREFIX
         OUTPUT_STRIP_TRAILING_WHITESPACE
@@ -65,7 +65,7 @@ if (CMAKE_HOST_SYSTEM_NAME MATCHES "Darwin")
     endif()
 
     execute_process(
-        COMMAND ${BREW_BIN} --prefix flex
+        COMMAND brew --prefix flex
         RESULT_VARIABLE BREW_FLEX
         OUTPUT_VARIABLE BREW_FLEX_PREFIX
         OUTPUT_STRIP_TRAILING_WHITESPACE
