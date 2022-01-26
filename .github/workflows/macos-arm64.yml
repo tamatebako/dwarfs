@@ -72,11 +72,7 @@ jobs:
 
     steps:
 
-      - name: Set target
-        run:  |
-          echo "CXXFLAGS=--target=${{ matrix.setup.target }}-apple-macos${{ matrix.setup.version }} $CXXFLAGS" >> $GITHUB_ENV
-
-      - name: Select XCode and SDK
+      - name: Select XCode
         uses: maxim-lobanov/setup-xcode@v1
         with:
           xcode-version: ${{ matrix.setup.xcode }}
@@ -105,15 +101,10 @@ jobs:
           cmake .. -DBREW_BIN=${{ github.workspace }}/../arm-homebrew/bin/brew \
                    -DWITH_TESTS=${{ matrix.setup.tests }} \
                    -DTEBAKO_BUILD_SCOPE=${{ matrix.setup.scope }} \
+                   -DTEBAKO_BUILD_TARGET=${{ matrix.setup.target }}-apple-macos${{ matrix.setup.version }} \
                    -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/install
 
       - name: Build
         run: |
           cd build
           make -j4
-
-#      - name: Test
-#        if: ${{ matrix.setup.scope == 'ALL' }}
-#        run: |
-#          cd build
-#          make test

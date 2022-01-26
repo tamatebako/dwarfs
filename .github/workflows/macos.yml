@@ -58,35 +58,34 @@ env:
 
 jobs:
   build:
-    name: "macos-${{ matrix.setup.version }} [target:${{ matrix.setup.target }}, scope:${{ matrix.setup.scope }}]"
+    name: "macos-${{ matrix.setup.version }} [ scope:${{ matrix.setup.scope }} ]"
     runs-on: macos-${{ matrix.setup.version }}
     strategy:
       fail-fast: false
+#  We are running two configurations:     
+#   - ALL in order to run regression tests
+#   - MKD just to be sure that it build ok
       matrix:          
         setup:
           - version: '10.15'
             xcode: '12.1.1'
-            target: x86_64
-            scope: ALL
+            scope: 'ALL'
             tests: 'ON'
           - version: '10.15'
             xcode: '12.1.1'
-            target: x86_64
-            scope: MKD
+            scope: 'MKD'
             tests: 'OFF'
           - version: '11.0'
             xcode: '12.4'
-            target: x86_64
-            scope: ALL
+            scope: 'ALL'
             tests: 'ON'
           - version: '11.0'
             xcode: '12.4'
-            target: x86_64
-            scope: MKD
+            scope: 'MKD'
             tests: 'OFF'
 
     steps:
-      - name: Select XCode and SDK
+      - name: Select XCode version
         uses: maxim-lobanov/setup-xcode@v1
         with:
           xcode-version: ${{ matrix.setup.xcode }}

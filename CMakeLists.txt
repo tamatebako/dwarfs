@@ -56,19 +56,38 @@ set(DEPS_LIB_DIR ${DEPS}/lib)
 set(DEPS_BIN_DIR ${DEPS}/bin)
 set(DEPS_SBIN_DIR ${DEPS}/sbin)
 
+# -------------------------------------------------------------------------------------------------------------------------------
+# Build scopes
+#  ALL -- build library, all tools            [WITH_TEST or WITH_BENCHMARKS ensofce this scope]
+#  MKD -- build library and mkdwarfs utility  [This is the configuration required for tebako]
+#  LIB -- build library only                  [This configuration is required for cross compilation of tebako packaged software]
+#                                             [For example in order to build MacOS arm64 package on MacOS x86_64               ]
+#  In the last case TEBAKO_BUILD_TARGET variable defines compiler -target setting but not for FbThrist, of course  
+# -------------------------------------------------------------------------------------------------------------------------------
+
 if(NOT TEBAKO_BUILD_SCOPE)
   set(TEBAKO_BUILD_SCOPE "ALL")
-  message(STATUS "Tebako build scope is not specified and has been set to ALL")
+  message("Tebako build scope is not specified and has been set to ALL")
 endif()
 if((WITH_TESTS OR WITH_BENCHMARKS) AND NOT "${TEBAKO_BUILD_SCOPE}" STREQUAL "ALL" )
   set(TEBAKO_BUILD_SCOPE "ALL")
-  message(STATUS "WITH_TESTS or WITH_BENCHMARKS option was specified. Tebako build scope has been forcefully set to ALL")
+  message("WITH_TESTS or WITH_BENCHMARKS option was specified. Tebako build scope has been forcefully set to ALL")
 endif()
 if(NOT "${TEBAKO_BUILD_SCOPE}" STREQUAL "ALL" AND
    NOT "${TEBAKO_BUILD_SCOPE}" STREQUAL "MKD" AND
    NOT "${TEBAKO_BUILD_SCOPE}" STREQUAL "LIB")
    message(STATUS "Unknown build scope setting ${TEBAKO_BUILD_SCOPE}. Tebako build scope has been forcefully set to ALL")
    set(TEBAKO_BUILD_SCOPE "ALL")
+endif()
+if(TEBAKO_BUILD_TARGET)
+  if(NOT "${TEBAKO_BUILD_SCOPE}" STREQUAL "LIB")
+    message(WARNING "TEBAKO_BUILD_SCOPE is ${TEBAKO_BUILD_SCOPE}. TEBAKO_BUILD_TARGET will be ignored.")
+  else()
+    message("Building dwarfs library for ${TEBAKO_BUILD_TARGET}.")
+    set(TARGET ${TEBAKO_BUILD_TARGET})
+  endif()
+elseif("${TEBAKO_BUILD_SCOPE}" STREQUAL "LIB")
+  message(WARNING "TEBAKO_BUILD_SCOPE is LIB but TEBAKO_BUILD_TARGET is not set.")
 endif()
 
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
@@ -88,6 +107,9 @@ elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
   if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "12.0.0")
   # for some reason, clang-10 and clang-11 binaries crash upon throwing exceptions
     add_compile_options(-fno-omit-frame-pointer)
+  endif()
+  if(TARGET)
+    add_compile_options("--target=${TARGET}")
   endif()
 endif()
 
@@ -421,6 +443,8 @@ else()
   message(WARNING "ronn was not found, skipping generation of manpages")
 endif()
 
+include(${CMAKE_SOURCE_DIR}/cmake/modules/SetupFbThrift.cmake)
+
 list(
   APPEND
   FROZEN_THRIFT_SRC
@@ -457,16 +481,33 @@ list(
   ${CMAKE_CURRENT_BINARY_DIR}/thrift/dwarfs/gen-cpp2/metadata_visit_union.h
   ${CMAKE_CURRENT_BINARY_DIR}/thrift/dwarfs/gen-cpp2/metadata_visitation.h)
 
+list(
+  APPEND
+  THRIFT_LIGHT_SRC
+  ${FBTHRIFT_SOURCE_DIR}/thrift/lib/cpp2/FieldRef.cpp
+  ${FBTHRIFT_SOURCE_DIR}/thrift/lib/cpp2/protocol/CompactProtocol.cpp
+  ${FBTHRIFT_SOURCE_DIR}/thrift/lib/cpp2/protocol/BinaryProtocol.cpp
+  ${FBTHRIFT_SOURCE_DIR}/thrift/lib/cpp2/protocol/DebugProtocol.cpp
+  ${FBTHRIFT_SOURCE_DIR}/thrift/lib/cpp2/protocol/JSONProtocolCommon.cpp
+  ${FBTHRIFT_SOURCE_DIR}/thrift/lib/cpp2/protocol/JSONProtocol.cpp
+  ${FBTHRIFT_SOURCE_DIR}/thrift/lib/cpp/protocol/TProtocolException.cpp
+  ${FBTHRIFT_SOURCE_DIR}/thrift/lib/cpp/util/VarintUtils.cpp
+  ${FBTHRIFT_SOURCE_DIR}/thrift/lib/cpp2/gen/module_types_cpp.cpp
+  ${FBTHRIFT_SOURCE_DIR}/thrift/lib/cpp2/frozen/Frozen.cpp
+  ${FBTHRIFT_SOURCE_DIR}/thrift/lib/cpp2/frozen/FrozenUtil.cpp
+  ${FBTHRIFT_SOURCE_DIR}/thrift/lib/cpp2/frozen/schema/MemorySchema.cpp
+)
+
 add_custom_command(
-  OUTPUT ${FROZEN_THRIFT_SRC}
+  OUTPUT ${FROZEN_THRIFT_SRC}  ${THRIFT_LIGHT_SRC}
   COMMAND mkdir -p ${CMAKE_CURRENT_BINARY_DIR}/thrift/lib/thrift
   COMMAND
-    cp ${CMAKE_CURRENT_SOURCE_DIR}/fbthrift/thrift/lib/thrift/frozen.thrift
-    ${CMAKE_CURRENT_BINARY_DIR}/thrift/lib/thrift/
+    cp ${FBTHRIFT_SOURCE_DIR}/thrift/lib/thrift/frozen.thrift
+       ${CMAKE_CURRENT_BINARY_DIR}/thrift/lib/thrift/
   COMMAND cd ${CMAKE_CURRENT_BINARY_DIR}/thrift/lib/thrift &&
           ${DEPS}/bin/thrift1 --gen mstch_cpp2 frozen.thrift
   DEPENDS ${FBTHRIFT_PRJ}
-          ${CMAKE_CURRENT_SOURCE_DIR}/fbthrift/thrift/lib/thrift/frozen.thrift)
+)
 
 add_custom_command(
   OUTPUT ${METADATA_THRIFT_SRC}
@@ -486,7 +527,7 @@ list(
   ${CMAKE_CURRENT_BINARY_DIR}/folly
   ${CMAKE_CURRENT_BINARY_DIR}/thrift
   ${CMAKE_CURRENT_SOURCE_DIR}/folly
-  ${CMAKE_CURRENT_SOURCE_DIR}/fbthrift
+  ${FBTHRIFT_SOURCE_DIR}
   ${CMAKE_CURRENT_BINARY_DIR})
 
 if(NOT (ZSTD_FOUND AND PREFER_SYSTEM_ZSTD))
@@ -506,18 +547,7 @@ endif()
 
 add_library(
   thrift_light
-  ${CMAKE_CURRENT_SOURCE_DIR}/fbthrift/thrift/lib/cpp2/FieldRef.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/fbthrift/thrift/lib/cpp2/protocol/CompactProtocol.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/fbthrift/thrift/lib/cpp2/protocol/BinaryProtocol.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/fbthrift/thrift/lib/cpp2/protocol/DebugProtocol.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/fbthrift/thrift/lib/cpp2/protocol/JSONProtocolCommon.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/fbthrift/thrift/lib/cpp2/protocol/JSONProtocol.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/fbthrift/thrift/lib/cpp/protocol/TProtocolException.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/fbthrift/thrift/lib/cpp/util/VarintUtils.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/fbthrift/thrift/lib/cpp2/gen/module_types_cpp.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/fbthrift/thrift/lib/cpp2/frozen/Frozen.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/fbthrift/thrift/lib/cpp2/frozen/FrozenUtil.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/fbthrift/thrift/lib/cpp2/frozen/schema/MemorySchema.cpp
+  ${THRIFT_LIGHT_SRC}
   ${CMAKE_CURRENT_BINARY_DIR}/thrift/lib/thrift/gen-cpp2/frozen_data.cpp
   ${CMAKE_CURRENT_BINARY_DIR}/thrift/lib/thrift/gen-cpp2/frozen_types.cpp)
 
