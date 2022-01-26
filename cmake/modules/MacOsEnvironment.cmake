@@ -27,6 +27,10 @@
 set(GNU_BASH "bash")
 
 if (CMAKE_HOST_SYSTEM_NAME MATCHES "Darwin")
+# If we are cross compiling BREW_BIN will point to homebrew environment for target
+# If we are nor compiling it will be empty
+# Note that below for Bison, Flex and bash we are using host homebrew environment (just 'brew')
+# while other packages refer target environment potentially specified by BREW_BIN
     if(NOT BREW_BIN)
       set(BREW_BIN brew)
     endif()
@@ -77,11 +81,22 @@ if (CMAKE_HOST_SYSTEM_NAME MATCHES "Darwin")
         set(FLEX_EXECUTABLE "${BREW_FLEX_PREFIX}/bin/flex")
     endif()
 
+    execute_process(
+        COMMAND brew --prefix bash
+        RESULT_VARIABLE BREW_BASH
+        OUTPUT_VARIABLE BREW_BASH_PREFIX
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+    if (BREW_BASH EQUAL 0 AND EXISTS "${BREW_BASH_PREFIX}")
+        message(STATUS "Found GNU bash keg installed by Homebrew at ${BREW_BASH_PREFIX}")
+        set(GNU_BASH "${BREW_BASH_PREFIX}/bin/bash")
+    endif()
+
+
 # Suppress superfluous randlib warnings about "*.a" having no symbols on MacOSX.
 	set(CMAKE_C_ARCHIVE_CREATE   "<CMAKE_AR> Scr <TARGET> <LINK_FLAGS> <OBJECTS>")
 	set(CMAKE_CXX_ARCHIVE_CREATE "<CMAKE_AR> Scr <TARGET> <LINK_FLAGS> <OBJECTS>")
 	set(CMAKE_C_ARCHIVE_FINISH   "<CMAKE_RANLIB> -no_warning_for_no_symbols -c <TARGET>")
 	set(CMAKE_CXX_ARCHIVE_FINISH "<CMAKE_RANLIB> -no_warning_for_no_symbols -c <TARGET>")
 
-    set(GNU_BASH "${BREW_PREFIX}/bin/bash")
 endif()

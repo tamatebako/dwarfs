@@ -55,6 +55,7 @@ re="find_package(OpenSSL REQUIRED)"
 find_package(OpenSSL REQUIRED)
 # -- Start of tebako patch --
 find_package(Boost 1.65 REQUIRED COMPONENTS filesystem)
+include_directories(${Boost_INCLUDE_DIRS})
 # -- End of tebako patch --
 EOM
 

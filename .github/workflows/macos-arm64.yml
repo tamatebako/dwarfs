@@ -86,7 +86,7 @@ jobs:
 # Already installed: pkg-config, openssl@1.1, libevent, libsodium, lz4, xz
 # Not installing [if ubuntu is considered the baseline] libiberty, libunwind, libdwarf, libelf
         run: |
-          brew install bison flex binutils gnu-sed bash glog gflags
+          brew install bison flex gnu-sed bash glog gflags
 
       - name: Install packages for target host architecture
         run: |
