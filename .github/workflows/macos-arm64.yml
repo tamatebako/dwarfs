@@ -91,8 +91,8 @@ jobs:
       - name: Install packages for target host architecture
         run: |
           ci-scripts/arm-brew-setup.sh ${{ github.workspace }}/..
-          ci-scripts/arm-brew-install.sh ${{ github.workspace }}/.. libb2 lz4 xz zstd libarchive     \
-                                iicu4c boost jemalloc fmt gflags glog openssl@1.1 libevent libsodium \
+          ci-scripts/arm-brew-install.sh ${{ github.workspace }}/.. libb2 lz4 xz zstd libarchive    \
+                                icu4c boost jemalloc fmt gflags glog openssl@1.1 libevent libsodium \
                                 double-conversion
 
       - name: Configure
