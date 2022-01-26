@@ -91,7 +91,7 @@ jobs:
       - name: Install more packages
         run: |
           ci-scripts/arm-brew-setup.sh ${{ github.workspace }}/..
-          ci-scripts/arm-brew-install.sh ${{ github.workspace }}/.. libbb2 lz4 xz libarchive  \
+          ci-scripts/arm-brew-install.sh ${{ github.workspace }}/.. libb2 lz4 xz libarchive  \
                                 boost jemalloc fmt gflags glog openssl@1.1 libevent libsodium \
                                 double-conversion
 
