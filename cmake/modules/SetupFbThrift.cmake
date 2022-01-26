@@ -35,7 +35,7 @@ ExternalProject_Add(${FBTHRIFT_PRJ}
   UPDATE_COMMAND ""
   PATCH_COMMAND "${GNU_BASH}" "${CMAKE_CURRENT_SOURCE_DIR}/ci-scripts/patch-fbthrift.sh" "${FBTHRIFT_SOURCE_DIR}/CMakeLists.txt"
   CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${DEPS}
-             -DCMAKE_PREFIX_PATH="${CMAKE_PREFIX_PATH}:${BREW_PREFIX}/opt/openssl@1.1"
+             -DCMAKE_PREFIX_PATH="${BREW_PREFIX};${BREW_PREFIX}/opt/openssl@1.1"
              -DCMAKE_BUILD_TYPE=Release
              -Dcompiler_only:BOOL=ON
   SOURCE_DIR ${FBTHRIFT_SOURCE_DIR}
