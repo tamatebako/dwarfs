@@ -99,7 +99,7 @@ if(STATIC_BUILD_DO_NOT_USE)
   set(GFLAGS_SHARED
       OFF
       CACHE BOOL "static")
-endif()
+endif() 
 
 list(APPEND DWARFS_BOOST_MODULES date_time filesystem program_options system)
 
