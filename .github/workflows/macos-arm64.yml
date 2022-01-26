@@ -86,13 +86,14 @@ jobs:
 # Already installed: pkg-config, openssl@1.1, libevent, libsodium, lz4, xz
 # Not installing [if ubuntu is considered the baseline] libiberty, libunwind, libdwarf, libelf
         run: |
-          brew install bison flex binutils
+          brew install bison flex binutils gnu-sed glog gflags
 
       - name: Install more packages
         run: |
           ci-scripts/arm-brew-setup.sh ${{ github.workspace }}/..
-          ci-scripts/arm-brew-install.sh ${{ github.workspace }}/.. libarchive double-conversion \
-                                boost jemalloc fmt glog openssl@1.1 libevent libsodium lz4 xz
+          ci-scripts/arm-brew-install.sh ${{ github.workspace }}/.. libbb2 lz4 xz libarchive  \
+                                boost jemalloc fmt gflags glog openssl@1.1 libevent libsodium \
+                                double-conversion
 
       - name: Configure
         run: |

@@ -98,13 +98,15 @@ jobs:
       - name: Install packages
         run: |
           brew install  \
-          bison flex binutils boost libarchive double-conversion jemalloc fmt glog
+          bison flex gnu-sed binutils boost libarchive double-conversion jemalloc fmt glog
 
       - name: Configure
         run: |
           mkdir build
           cd build
-          cmake .. -DWITH_TESTS=${{ matrix.setup.tests }} -DTEBAKO_BUILD_SCOPE=${{ matrix.setup.scope }} -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/install
+          cmake .. -DWITH_TESTS=${{ matrix.setup.tests }}         \
+                   -DTEBAKO_BUILD_SCOPE=${{ matrix.setup.scope }} \
+                   -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/install
 
       - name: Build
         run: |
