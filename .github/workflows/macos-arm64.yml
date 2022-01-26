@@ -82,17 +82,17 @@ jobs:
         with:
           submodules: true
 
-      - name: Install packages
+      - name: Install packages for build host architecture
 # Already installed: pkg-config, openssl@1.1, libevent, libsodium, lz4, xz
 # Not installing [if ubuntu is considered the baseline] libiberty, libunwind, libdwarf, libelf
         run: |
-          brew install bison flex binutils gnu-sed glog gflags
+          brew install bison flex binutils gnu-sed bash glog gflags
 
-      - name: Install more packages
+      - name: Install packages for target host architecture
         run: |
           ci-scripts/arm-brew-setup.sh ${{ github.workspace }}/..
-          ci-scripts/arm-brew-install.sh ${{ github.workspace }}/.. libb2 lz4 xz libarchive  \
-                                boost jemalloc fmt gflags glog openssl@1.1 libevent libsodium \
+          ci-scripts/arm-brew-install.sh ${{ github.workspace }}/.. libb2 lz4 xz zstd libarchive     \
+                                iicu4c boost jemalloc fmt gflags glog openssl@1.1 libevent libsodium \
                                 double-conversion
 
       - name: Configure
