@@ -24,6 +24,8 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
+set(GNU_BASH "bash")
+
 if (CMAKE_HOST_SYSTEM_NAME MATCHES "Darwin")
     if(NOT BREW_BIN)
       set(BREW_BIN brew)
@@ -81,4 +83,5 @@ if (CMAKE_HOST_SYSTEM_NAME MATCHES "Darwin")
 	set(CMAKE_C_ARCHIVE_FINISH   "<CMAKE_RANLIB> -no_warning_for_no_symbols -c <TARGET>")
 	set(CMAKE_CXX_ARCHIVE_FINISH "<CMAKE_RANLIB> -no_warning_for_no_symbols -c <TARGET>")
 
+    set(GNU_BASH "${BREW_PREFIX}/bin/bash")
 endif()

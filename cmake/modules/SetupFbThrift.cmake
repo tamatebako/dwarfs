@@ -33,7 +33,7 @@ ExternalProject_Add(${FBTHRIFT_PRJ}
   GIT_REPOSITORY "https://github.com/facebook/fbthrift.git"
   GIT_TAG ${FBTHRIFT_TAG}
   UPDATE_COMMAND ""
-  PATCH_COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/ci-scripts/patch-fbthrift.sh" "${FBTHRIFT_SOURCE_DIR}/CMakeLists.txt"
+  PATCH_COMMAND "${GNU_BASH}" "${CMAKE_CURRENT_SOURCE_DIR}/ci-scripts/patch-fbthrift.sh" "${FBTHRIFT_SOURCE_DIR}/CMakeLists.txt"
   CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${DEPS}
              -DCMAKE_BUILD_TYPE=Release
              -Dcompiler_only:BOOL=ON
