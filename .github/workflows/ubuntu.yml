@@ -38,7 +38,7 @@ on:
       - 'docs/**'
       - '**.adoc'
       - '**.md'
-      - '.github/workflows/*.yml'      
+      - '.github/workflows/*.yml'
       - '.github/workflows/ubuntu.yml'
   pull_request:
     branches: [ libdwarfs_wr* ]
@@ -63,7 +63,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ ubuntu-18.04, ubuntu-20.04 ]
-#  We are running two configurations:     
+#  We are running two configurations:
 #   - ALL in order to run regression tests
 #   - MKD just to be sure that it build ok
         setup:

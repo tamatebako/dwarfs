@@ -62,10 +62,10 @@ jobs:
     runs-on: macos-${{ matrix.setup.version }}
     strategy:
       fail-fast: false
-#  We are running two configurations:     
+#  We are running two configurations:
 #   - ALL in order to run regression tests
 #   - MKD just to be sure that it build ok
-      matrix:          
+      matrix:
         setup:
           - version: '10.15'
             xcode: '12.1.1'
@@ -116,4 +116,3 @@ jobs:
         run: |
           cd build
           make test
-          

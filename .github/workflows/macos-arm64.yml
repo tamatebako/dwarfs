@@ -62,7 +62,7 @@ jobs:
     runs-on: macos-${{ matrix.setup.version }}
     strategy:
       fail-fast: false
-      matrix:          
+      matrix:
         setup:
           - version: '11.0'
             xcode: '12.4'
@@ -86,7 +86,7 @@ jobs:
 # Already installed: pkg-config, openssl@1.1, libevent, libsodium, lz4, xz
 # Not installing [if ubuntu is considered the baseline] libiberty, libunwind, libdwarf, libelf
         run: |
-          brew install bison flex binutils 
+          brew install bison flex binutils
 
       - name: Install more packages
         run: |

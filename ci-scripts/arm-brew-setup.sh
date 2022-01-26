@@ -1,5 +1,5 @@
 #! /bin/zsh
-# 
+#
 # Copyright (c) 2022, [Ribose Inc](https://www.ribose.com).
 # All rights reserved.
 # This file is a part of tebako
@@ -31,5 +31,5 @@ set -o errexit -o pipefail -o noclobber -o nounset
 
 DIR0="$( cd "$1" && pwd )"
 DIR1="$DIR0/arm-homebrew"
-mkdir "$DIR1"  
+mkdir "$DIR1"
 curl -L https://github.com/Homebrew/brew/tarball/master | tar xz --strip 1 -C "$DIR1"

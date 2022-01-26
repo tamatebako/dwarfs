@@ -62,7 +62,7 @@ set(DEPS_SBIN_DIR ${DEPS}/sbin)
 #  MKD -- build library and mkdwarfs utility  [This is the configuration required for tebako]
 #  LIB -- build library only                  [This configuration is required for cross compilation of tebako packaged software]
 #                                             [For example in order to build MacOS arm64 package on MacOS x86_64               ]
-#  In the last case TEBAKO_BUILD_TARGET variable defines compiler -target setting but not for FbThrist, of course  
+#  In the last case TEBAKO_BUILD_TARGET variable defines compiler -target setting but not for FbThrist, of course
 # -------------------------------------------------------------------------------------------------------------------------------
 
 if(NOT TEBAKO_BUILD_SCOPE)
@@ -134,7 +134,7 @@ if(STATIC_BUILD_DO_NOT_USE)
   set(GFLAGS_SHARED
       OFF
       CACHE BOOL "static")
-endif() 
+endif()
 
 list(APPEND DWARFS_BOOST_MODULES date_time filesystem program_options system)
 
@@ -223,7 +223,7 @@ if(WITH_TESTS)
   # Prevent overriding the parent project's compiler/linker settings on Windows
     set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
   # Do not build Gmock
-    set(BUILD_GMOCK OFF CACHE INTERNAL "")    
+    set(BUILD_GMOCK OFF CACHE INTERNAL "")
     FetchContent_MakeAvailable(googletest)
   endif()
 
