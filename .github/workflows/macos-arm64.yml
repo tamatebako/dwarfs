@@ -92,8 +92,8 @@ jobs:
 
       - name: Install packages for target host architecture
         run: |
-          ci-scripts/arm-brew-setup.sh ${{ github.workspace }}/..
-          ci-scripts/arm-brew-install.sh ${{ github.workspace }}/.. libb2 lz4 xz zstd libarchive    \
+          ci-scripts/arm-brew-setup.sh ${{ github.workspace }}
+          ci-scripts/arm-brew-install.sh ${{ github.workspace }} libb2 lz4 xz zstd libarchive       \
                                 icu4c boost jemalloc fmt gflags glog openssl@1.1 libevent libsodium \
                                 double-conversion
 
@@ -101,7 +101,7 @@ jobs:
         run: |
           mkdir build
           cd build
-          cmake .. -DBREW_BIN=${{ github.workspace }}/../arm-homebrew/bin/brew \
+          cmake .. -DTARGET_HOMEBREW=${{ github.workspace }}/arm-homebrew \
                    -DWITH_TESTS=${{ matrix.setup.tests }} \
                    -DTEBAKO_BUILD_SCOPE=${{ matrix.setup.scope }} \
                    -DTEBAKO_BUILD_TARGET=${{ matrix.setup.target }}-apple-macos${{ matrix.setup.version }} \
@@ -113,11 +113,11 @@ jobs:
           make -j4      
 
       - name: Check aechitecture
-        if: ${{ matrix.setup.tests == 'ON' }}
+        if: ${{ matrix.setup.scope == 'ALL' }}
         run: file build/mkdwarfs | grep 'arm64'
 
       - name: Upload test app
-        if: ${{ matrix.setup.tests == 'ON' }}
+        if: ${{ matrix.setup.scope == 'ALL' }}
         uses: actions/upload-artifact@v2
         with:
           name: arm64-mkdwarfs

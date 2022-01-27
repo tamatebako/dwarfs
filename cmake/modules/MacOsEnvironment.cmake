@@ -80,12 +80,11 @@ if (CMAKE_HOST_SYSTEM_NAME MATCHES "Darwin")
     set(GNU_BASH "${BREW_BASH_PREFIX}/bin/bash")
   endif()
 
-  if(NOT BREW_BIN)
-    set(BREW_BIN brew)
+  if(NOT TARGET_HOMEBREW)
     set(TARGET_BREW_PREFIX ${BUILD_BREW_PREFIX} )
   else()
     execute_process(
-        COMMAND ${BREW_BIN} --prefix
+        COMMAND "${TARGET_HOMEBREW}/bin/brew" --prefix
         RESULT_VARIABLE BREW_PREFIX_RES
         OUTPUT_VARIABLE TARGET_BREW_PREFIX
         OUTPUT_STRIP_TRAILING_WHITESPACE
