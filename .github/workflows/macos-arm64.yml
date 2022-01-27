@@ -122,3 +122,4 @@ jobs:
         with:
           name: arm64-test
           path: ${{github.workspace}}/build/dwarfs_test
+          retention-days: 1

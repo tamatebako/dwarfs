@@ -25,8 +25,7 @@
 
 def_ext_prj_g(FBTHRIFT "fee4167")
 
-message("Collecting packages:")
-message("fbthrift     - " @${FBTHRIFT_TAG}  " at " ${FBTHRIFT_SOURCE_DIR})
+message(STATUS "Collecting fbthrift - " @${FBTHRIFT_TAG}  " at " ${FBTHRIFT_SOURCE_DIR})
 
 set(CMAKE_ARGUMENTS -DCMAKE_INSTALL_PREFIX=${DEPS}
                     -DCMAKE_BUILD_TYPE=Release

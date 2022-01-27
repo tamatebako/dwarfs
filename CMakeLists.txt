@@ -79,6 +79,12 @@ if(NOT "${TEBAKO_BUILD_SCOPE}" STREQUAL "ALL" AND
    message(STATUS "Unknown build scope setting ${TEBAKO_BUILD_SCOPE}. Tebako build scope has been forcefully set to ALL")
    set(TEBAKO_BUILD_SCOPE "ALL")
 endif()
+
+if(TEBAKO_BUILD_TARGET)
+  message("Building dwarfs for ${TEBAKO_BUILD_TARGET}.")
+  add_compile_options("--target=${TEBAKO_BUILD_TARGET}")
+endif()
+
 #if(TEBAKO_BUILD_TARGET)
 #  if(NOT "${TEBAKO_BUILD_SCOPE}" STREQUAL "LIB")
 #    message(WARNING "TEBAKO_BUILD_SCOPE is ${TEBAKO_BUILD_SCOPE}. TEBAKO_BUILD_TARGET will be ignored.")
@@ -107,10 +113,6 @@ elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
   if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "12.0.0")
   # for some reason, clang-10 and clang-11 binaries crash upon throwing exceptions
     add_compile_options(-fno-omit-frame-pointer)
-  endif()
-  if(TEBAKO_BUILD_TARGET)
-    message("Building dwarfs library for ${TEBAKO_BUILD_TARGET}.")
-    add_compile_options("--target=${TEBAKO_BUILD_TARGET}")
   endif()
 endif()
 
