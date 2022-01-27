@@ -69,9 +69,13 @@ jobs:
             target: arm64
             scope: LIB
             tests: 'OFF'
+          - version: '11.0'
+            xcode: '12.4'
+            target: arm64
+            scope: ALL
+            tests: 'ON'
 
     steps:
-
       - name: Select XCode
         uses: maxim-lobanov/setup-xcode@v1
         with:
@@ -106,4 +110,15 @@ jobs:
       - name: Build
         run: |
           cd build
-          make -j4
+          make -j4      
+
+      - name: Check aechitecture
+        if: ${{ matrix.setup.tests == 'ON' }}
+        run: file build/dwarfs_test | grep 'arm64'
+
+      - name: Upload test app
+        if: ${{ matrix.setup.tests == 'ON' }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: arm64-test
+          path: ${{github.workspace}}/build/dwarfs_test
