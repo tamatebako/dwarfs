@@ -36,7 +36,6 @@ if(BUILD_CMAKE_ARGUMENTS)
   list(APPEND CMAKE_ARGUMENTS ${BUILD_CMAKE_ARGUMENTS})
 endif()
 
-message(${CMAKE_ARGUMENTS})
 ExternalProject_Add(${FBTHRIFT_PRJ}
   PREFIX "${DEPS}"
   GIT_REPOSITORY "https://github.com/facebook/fbthrift.git"

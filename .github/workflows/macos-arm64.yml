@@ -84,7 +84,7 @@ jobs:
 
       - name: Install packages for build host architecture
         run: |
-          brew install bison flex gnu-sed bash glog gflags
+          brew install bison flex gnu-sed bash glog gflags icu4c boost
 
       - name: Install packages for target host architecture
         run: |
