@@ -15,15 +15,22 @@
 # You should have received a copy of the GNU General Public License along with
 # dwarfs.  If not, see <https://www.gnu.org/licenses/>.
 #
-cmake_minimum_required(VERSION 3.13.4)
+cmake_minimum_required(VERSION 3.20.0)
 
 cmake_policy(SET CMP0048 NEW)
 project(tebako-dwarfs VERSION 0.1.7)
 
 include(ExternalProject)
 include(FetchContent)
+<<<<<<< HEAD
 
+=======
+>>>>>>> fa231155856b5bf50458c2fa35a4389f0c311e9b
 include(CheckCXXSourceCompiles)
+
+include(${CMAKE_SOURCE_DIR}/cmake/version.cmake)
+include(${CMAKE_SOURCE_DIR}/cmake/modules/MacOsEnvironment.cmake)
+include(${CMAKE_SOURCE_DIR}/cmake/modules/DefExternalProject.cmake)
 
 option(WITH_TESTS "build with tests" OFF)
 option(WITH_BENCHMARKS "build with benchmarks" OFF)
@@ -41,19 +48,50 @@ option(STATIC_BUILD_DO_NOT_USE "try static build (experimental)" OFF)
 
 set(default_build_type "Release")
 
+if (NOT DEPS)
+  set(DEPS "${CMAKE_CURRENT_SOURCE_DIR}/deps")
+  message("Using local setting for DEPS folder: ${DEPS}")
+else()
+  message("Using upstream setting for DEPS folder: ${DEPS}")
+endif()
+
+set(DEPS_INCLUDE_DIR ${DEPS}/include)
+set(DEPS_LIB_DIR ${DEPS}/lib)
+set(DEPS_BIN_DIR ${DEPS}/bin)
+set(DEPS_SBIN_DIR ${DEPS}/sbin)
+
+# -------------------------------------------------------------------------------------------------------------------------------
+# Build scopes
+#  ALL -- build library, all tools            [WITH_TEST or WITH_BENCHMARKS ensofce this scope]
+#  MKD -- build library and mkdwarfs utility  [This is the configuration required for tebako]
+#  LIB -- build library only                  [This configuration is required for cross compilation of tebako packaged software]
+#                                             [For example in order to build MacOS arm64 package on MacOS x86_64               ]
+#  In the last case TEBAKO_BUILD_TARGET variable defines compiler -target setting but not for FbThrist, of course
+# -------------------------------------------------------------------------------------------------------------------------------
+
 if(NOT TEBAKO_BUILD_SCOPE)
   set(TEBAKO_BUILD_SCOPE "ALL")
-  message(STATUS "Tebako build scope is not specified and has been set to ALL")
+  message("Tebako build scope is not specified and has been set to ALL")
 endif()
 if((WITH_TESTS OR WITH_BENCHMARKS) AND NOT "${TEBAKO_BUILD_SCOPE}" STREQUAL "ALL" )
   set(TEBAKO_BUILD_SCOPE "ALL")
-  message(STATUS "WITH_TESTS or WITH_BENCHMARKS option was specified. Tebako build scope has been forcefully set to ALL")
+  message("WITH_TESTS or WITH_BENCHMARKS option was specified. Tebako build scope has been forcefully set to ALL")
 endif()
 if(NOT "${TEBAKO_BUILD_SCOPE}" STREQUAL "ALL" AND
    NOT "${TEBAKO_BUILD_SCOPE}" STREQUAL "MKD" AND
    NOT "${TEBAKO_BUILD_SCOPE}" STREQUAL "LIB")
    message(STATUS "Unknown build scope setting ${TEBAKO_BUILD_SCOPE}. Tebako build scope has been forcefully set to ALL")
    set(TEBAKO_BUILD_SCOPE "ALL")
+endif()
+if(TEBAKO_BUILD_TARGET)
+  if(NOT "${TEBAKO_BUILD_SCOPE}" STREQUAL "LIB")
+    message(WARNING "TEBAKO_BUILD_SCOPE is ${TEBAKO_BUILD_SCOPE}. TEBAKO_BUILD_TARGET will be ignored.")
+  else()
+    message("Building dwarfs library for ${TEBAKO_BUILD_TARGET}.")
+    set(TARGET ${TEBAKO_BUILD_TARGET})
+  endif()
+elseif("${TEBAKO_BUILD_SCOPE}" STREQUAL "LIB")
+  message(WARNING "TEBAKO_BUILD_SCOPE is LIB but TEBAKO_BUILD_TARGET is not set.")
 endif()
 
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
@@ -74,10 +112,10 @@ elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
   # for some reason, clang-10 and clang-11 binaries crash upon throwing exceptions
     add_compile_options(-fno-omit-frame-pointer)
   endif()
+  if(TARGET)
+    add_compile_options("--target=${TARGET}")
+  endif()
 endif()
-
-include(${CMAKE_SOURCE_DIR}/cmake/version.cmake)
-include(${CMAKE_SOURCE_DIR}/cmake/modules/MacOsEnvironment.cmake)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules")
 
@@ -166,12 +204,7 @@ set(ZSTD_INCLUDE_DIR
     ""
     CACHE PATH "don't build folly with zstd" FORCE)
 
-set(compiler_only
-    ON
-    CACHE BOOL "only build thrift compiler")
-
 add_subdirectory(folly EXCLUDE_FROM_ALL)
-add_subdirectory(fbthrift EXCLUDE_FROM_ALL)
 
 if(NOT (ZSTD_FOUND AND PREFER_SYSTEM_ZSTD))
   add_subdirectory(zstd/build/cmake EXCLUDE_FROM_ALL)
@@ -191,10 +224,17 @@ if(WITH_TESTS)
       GIT_REPOSITORY https://github.com/google/googletest.git
       GIT_TAG        release-1.11.0
     )
+<<<<<<< HEAD
     # Prevent overriding the parent project's compiler/linker settings on Windows
     set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
     # Do not build Gmock
     set(BUILD_GMOCK OFF CACHE INTERNAL "")    
+=======
+  # Prevent overriding the parent project's compiler/linker settings on Windows
+    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+  # Do not build Gmock
+    set(BUILD_GMOCK OFF CACHE INTERNAL "")
+>>>>>>> fa231155856b5bf50458c2fa35a4389f0c311e9b
     FetchContent_MakeAvailable(googletest)
   endif()
 
@@ -414,6 +454,8 @@ else()
   message(WARNING "ronn was not found, skipping generation of manpages")
 endif()
 
+include(${CMAKE_SOURCE_DIR}/cmake/modules/SetupFbThrift.cmake)
+
 list(
   APPEND
   FROZEN_THRIFT_SRC
@@ -450,16 +492,33 @@ list(
   ${CMAKE_CURRENT_BINARY_DIR}/thrift/dwarfs/gen-cpp2/metadata_visit_union.h
   ${CMAKE_CURRENT_BINARY_DIR}/thrift/dwarfs/gen-cpp2/metadata_visitation.h)
 
+list(
+  APPEND
+  THRIFT_LIGHT_SRC
+  ${FBTHRIFT_SOURCE_DIR}/thrift/lib/cpp2/FieldRef.cpp
+  ${FBTHRIFT_SOURCE_DIR}/thrift/lib/cpp2/protocol/CompactProtocol.cpp
+  ${FBTHRIFT_SOURCE_DIR}/thrift/lib/cpp2/protocol/BinaryProtocol.cpp
+  ${FBTHRIFT_SOURCE_DIR}/thrift/lib/cpp2/protocol/DebugProtocol.cpp
+  ${FBTHRIFT_SOURCE_DIR}/thrift/lib/cpp2/protocol/JSONProtocolCommon.cpp
+  ${FBTHRIFT_SOURCE_DIR}/thrift/lib/cpp2/protocol/JSONProtocol.cpp
+  ${FBTHRIFT_SOURCE_DIR}/thrift/lib/cpp/protocol/TProtocolException.cpp
+  ${FBTHRIFT_SOURCE_DIR}/thrift/lib/cpp/util/VarintUtils.cpp
+  ${FBTHRIFT_SOURCE_DIR}/thrift/lib/cpp2/gen/module_types_cpp.cpp
+  ${FBTHRIFT_SOURCE_DIR}/thrift/lib/cpp2/frozen/Frozen.cpp
+  ${FBTHRIFT_SOURCE_DIR}/thrift/lib/cpp2/frozen/FrozenUtil.cpp
+  ${FBTHRIFT_SOURCE_DIR}/thrift/lib/cpp2/frozen/schema/MemorySchema.cpp
+)
+
 add_custom_command(
-  OUTPUT ${FROZEN_THRIFT_SRC}
+  OUTPUT ${FROZEN_THRIFT_SRC}  ${THRIFT_LIGHT_SRC}
   COMMAND mkdir -p ${CMAKE_CURRENT_BINARY_DIR}/thrift/lib/thrift
   COMMAND
-    cp ${CMAKE_CURRENT_SOURCE_DIR}/fbthrift/thrift/lib/thrift/frozen.thrift
-    ${CMAKE_CURRENT_BINARY_DIR}/thrift/lib/thrift/
+    cp ${FBTHRIFT_SOURCE_DIR}/thrift/lib/thrift/frozen.thrift
+       ${CMAKE_CURRENT_BINARY_DIR}/thrift/lib/thrift/
   COMMAND cd ${CMAKE_CURRENT_BINARY_DIR}/thrift/lib/thrift &&
-          ${CMAKE_CURRENT_BINARY_DIR}/bin/thrift1 --gen mstch_cpp2 frozen.thrift
-  DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/bin/thrift1
-          ${CMAKE_CURRENT_SOURCE_DIR}/fbthrift/thrift/lib/thrift/frozen.thrift)
+          ${DEPS}/bin/thrift1 --gen mstch_cpp2 frozen.thrift
+  DEPENDS ${FBTHRIFT_PRJ}
+)
 
 add_custom_command(
   OUTPUT ${METADATA_THRIFT_SRC}
@@ -468,9 +527,9 @@ add_custom_command(
           thrift/dwarfs/metadata.thrift
   COMMAND
     cd ${CMAKE_CURRENT_BINARY_DIR}/thrift/dwarfs &&
-    ${CMAKE_CURRENT_BINARY_DIR}/bin/thrift1 --gen mstch_cpp2:frozen2
+    ${DEPS}/bin/thrift1 --gen mstch_cpp2:frozen2
     metadata.thrift
-  DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/bin/thrift1
+  DEPENDS ${FBTHRIFT_PRJ}
           ${CMAKE_CURRENT_SOURCE_DIR}/thrift/metadata.thrift)
 
 list(
@@ -479,7 +538,7 @@ list(
   ${CMAKE_CURRENT_BINARY_DIR}/folly
   ${CMAKE_CURRENT_BINARY_DIR}/thrift
   ${CMAKE_CURRENT_SOURCE_DIR}/folly
-  ${CMAKE_CURRENT_SOURCE_DIR}/fbthrift
+  ${FBTHRIFT_SOURCE_DIR}
   ${CMAKE_CURRENT_BINARY_DIR})
 
 if(NOT (ZSTD_FOUND AND PREFER_SYSTEM_ZSTD))
@@ -499,18 +558,7 @@ endif()
 
 add_library(
   thrift_light
-  ${CMAKE_CURRENT_SOURCE_DIR}/fbthrift/thrift/lib/cpp2/FieldRef.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/fbthrift/thrift/lib/cpp2/protocol/CompactProtocol.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/fbthrift/thrift/lib/cpp2/protocol/BinaryProtocol.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/fbthrift/thrift/lib/cpp2/protocol/DebugProtocol.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/fbthrift/thrift/lib/cpp2/protocol/JSONProtocolCommon.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/fbthrift/thrift/lib/cpp2/protocol/JSONProtocol.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/fbthrift/thrift/lib/cpp/protocol/TProtocolException.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/fbthrift/thrift/lib/cpp/util/VarintUtils.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/fbthrift/thrift/lib/cpp2/gen/module_types_cpp.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/fbthrift/thrift/lib/cpp2/frozen/Frozen.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/fbthrift/thrift/lib/cpp2/frozen/FrozenUtil.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/fbthrift/thrift/lib/cpp2/frozen/schema/MemorySchema.cpp
+  ${THRIFT_LIGHT_SRC}
   ${CMAKE_CURRENT_BINARY_DIR}/thrift/lib/thrift/gen-cpp2/frozen_data.cpp
   ${CMAKE_CURRENT_BINARY_DIR}/thrift/lib/thrift/gen-cpp2/frozen_types.cpp)
 

@@ -24,7 +24,17 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
+<<<<<<< HEAD
 if (CMAKE_HOST_SYSTEM_NAME MATCHES "Darwin")
+=======
+set(GNU_BASH "bash")
+
+if (CMAKE_HOST_SYSTEM_NAME MATCHES "Darwin")
+# If we are cross compiling BREW_BIN will point to homebrew environment for target
+# If we are nor compiling it will be empty
+# Note that below for Bison, Flex and bash we are using host homebrew environment (just 'brew')
+# while other packages refer target environment potentially specified by BREW_BIN
+>>>>>>> fa231155856b5bf50458c2fa35a4389f0c311e9b
     if(NOT BREW_BIN)
       set(BREW_BIN brew)
     endif()
@@ -34,14 +44,18 @@ if (CMAKE_HOST_SYSTEM_NAME MATCHES "Darwin")
         OUTPUT_VARIABLE BREW_PREFIX
         OUTPUT_STRIP_TRAILING_WHITESPACE
     )
+<<<<<<< HEAD
     
+=======
+
+>>>>>>> fa231155856b5bf50458c2fa35a4389f0c311e9b
     if(NOT (BREW_PREFIX_RES EQUAL 0 AND EXISTS ${BREW_PREFIX}))
         message(FATAL "Could not find brew setup")
     endif()
 
     message("Using brew environment at ${BREW_PREFIX}")
 
-# https://github.com/actions/virtual-environments/blob/main/images/macos/macos-10.15-Readme.md    
+# https://github.com/actions/virtual-environments/blob/main/images/macos/macos-10.15-Readme.md
     set(ENV{OPENSSL_ROOT_DIR} "${BREW_PREFIX}/opt/openssl@1.1")
 
     set(CMAKE_PREFIX_PATH ${BREW_PREFIX})
@@ -49,7 +63,7 @@ if (CMAKE_HOST_SYSTEM_NAME MATCHES "Darwin")
 
 # libarchive is keg-only, which means it was not symlinked into /usr/local,
 # because macOS already provides this software and installing another version in
-# parallel can cause all kinds of trouble.            
+# parallel can cause all kinds of trouble.
     set(ENV{PKG_CONFIG_PATH} "${BREW_PREFIX}/opt/libarchive/lib/pkgconfig:$ENV{PKG_CONFIG_PATH}")
 
 #  https://stackoverflow.com/questions/53877344/cannot-configure-cmake-to-look-for-homebrew-installed-version-of-bison
@@ -74,6 +88,18 @@ if (CMAKE_HOST_SYSTEM_NAME MATCHES "Darwin")
         message(STATUS "Found Flex keg installed by Homebrew at ${BREW_FLEX_PREFIX}")
         set(FLEX_EXECUTABLE "${BREW_FLEX_PREFIX}/bin/flex")
     endif()
+
+    execute_process(
+        COMMAND brew --prefix bash
+        RESULT_VARIABLE BREW_BASH
+        OUTPUT_VARIABLE BREW_BASH_PREFIX
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+    if (BREW_BASH EQUAL 0 AND EXISTS "${BREW_BASH_PREFIX}")
+        message(STATUS "Found GNU bash keg installed by Homebrew at ${BREW_BASH_PREFIX}")
+        set(GNU_BASH "${BREW_BASH_PREFIX}/bin/bash")
+    endif()
+
 
 # Suppress superfluous randlib warnings about "*.a" having no symbols on MacOSX.
 	set(CMAKE_C_ARCHIVE_CREATE   "<CMAKE_AR> Scr <TARGET> <LINK_FLAGS> <OBJECTS>")
