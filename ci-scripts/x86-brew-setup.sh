@@ -1,5 +1,5 @@
 #! /bin/zsh
-# 
+#
 # Copyright (c) 2022, [Ribose Inc](https://www.ribose.com).
 # All rights reserved.
 # This file is a part of tebako
@@ -28,15 +28,8 @@
 # More safety, by turning some bugs into errors.
 
 set -o errexit -o pipefail -o noclobber -o nounset
-setopt sh_word_split
 
 DIR0="$( cd "$1" && pwd )"
-DIR1="$DIR0/arm-homebrew"
-
-for bottle in "${@:2}"
-do
-    echo "Installing $bottle"
-    response=$("$DIR1/bin/brew" fetch --force --bottle-tag=arm64_big_sur $bottle | grep "Downloaded to")
-    parsed=($response)
-    "$DIR1/bin/brew" install $parsed[3]
-done
+DIR1="$DIR0/x86-homebrew"
+mkdir "$DIR1"
+curl -L https://github.com/Homebrew/brew/tarball/master | tar xz --strip 1 -C "$DIR1"

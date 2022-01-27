@@ -28,19 +28,22 @@ def_ext_prj_g(FBTHRIFT "fee4167")
 message("Collecting packages:")
 message("fbthrift     - " @${FBTHRIFT_TAG}  " at " ${FBTHRIFT_SOURCE_DIR})
 
+set(CMAKE_ARGUMENTS -DCMAKE_INSTALL_PREFIX=${DEPS}
+                    -DCMAKE_BUILD_TYPE=Release
+                    -Dcompiler_only:BOOL=ON
+)
+if(BUILD_CMAKE_ARGUMENTS)
+  list(APPEND CMAKE_ARGUMENTS ${BUILD_CMAKE_ARGUMENTS})
+endif()
+
+message(${CMAKE_ARGUMENTS})
 ExternalProject_Add(${FBTHRIFT_PRJ}
   PREFIX "${DEPS}"
   GIT_REPOSITORY "https://github.com/facebook/fbthrift.git"
   GIT_TAG ${FBTHRIFT_TAG}
   UPDATE_COMMAND ""
   PATCH_COMMAND "${GNU_BASH}" "${CMAKE_CURRENT_SOURCE_DIR}/ci-scripts/patch-fbthrift.sh" "${FBTHRIFT_SOURCE_DIR}/CMakeLists.txt"
-  CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${DEPS}
-             -DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}
-             -DOPENSSL_ROOT_DIR=${OPENSSL_ROOT_DIR}
-             -DBISON_EXECUTABLE=${BISON_EXECUTABLE}
-             -DFLEX_EXECUTABLE=${FLEX_EXECUTABLE}
-             -DCMAKE_BUILD_TYPE=Release
-             -Dcompiler_only:BOOL=ON
+  CMAKE_ARGS ${CMAKE_ARGUMENTS}
   SOURCE_DIR ${FBTHRIFT_SOURCE_DIR}
   BINARY_DIR ${FBTHRIFT_BINARY_DIR}
 )
