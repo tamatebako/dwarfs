@@ -93,8 +93,8 @@ jobs:
       - name: Install packages for target host architecture
         run: |
           mkdir ${{ github.workspace }}/deps
-          ci-scripts/arm-brew-setup.sh ${{ github.workspace }}/deps
-          ci-scripts/arm-brew-install.sh ${{ github.workspace }}/deps libb2 lz4 xz zstd libarchive       \
+          ci-scripts/arm-brew-setup.sh ${{ github.workspace }}/..
+          ci-scripts/arm-brew-install.sh ${{ github.workspace }}/.. libb2 lz4 xz zstd libarchive       \
                                 icu4c boost jemalloc fmt gflags glog openssl@1.1 libevent libsodium \
                                 double-conversion
 
@@ -102,7 +102,7 @@ jobs:
         run: |
           mkdir build
           cd build
-          cmake .. -DTARGET_HOMEBREW=${{ github.workspace }}/deps/arm-homebrew \
+          cmake .. -DTARGET_HOMEBREW=${{ github.workspace }}/../arm-homebrew \
                    -DWITH_TESTS=${{ matrix.setup.tests }} \
                    -DTEBAKO_BUILD_SCOPE=${{ matrix.setup.scope }} \
                    -DTEBAKO_BUILD_TARGET=${{ matrix.setup.target }}-apple-macos${{ matrix.setup.version }} \
