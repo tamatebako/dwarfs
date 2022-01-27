@@ -22,10 +22,6 @@ project(tebako-dwarfs VERSION 0.1.7)
 
 include(ExternalProject)
 include(FetchContent)
-<<<<<<< HEAD
-
-=======
->>>>>>> fa231155856b5bf50458c2fa35a4389f0c311e9b
 include(CheckCXXSourceCompiles)
 
 include(${CMAKE_SOURCE_DIR}/cmake/version.cmake)
@@ -224,17 +220,10 @@ if(WITH_TESTS)
       GIT_REPOSITORY https://github.com/google/googletest.git
       GIT_TAG        release-1.11.0
     )
-<<<<<<< HEAD
-    # Prevent overriding the parent project's compiler/linker settings on Windows
-    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-    # Do not build Gmock
-    set(BUILD_GMOCK OFF CACHE INTERNAL "")    
-=======
   # Prevent overriding the parent project's compiler/linker settings on Windows
     set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
   # Do not build Gmock
     set(BUILD_GMOCK OFF CACHE INTERNAL "")
->>>>>>> fa231155856b5bf50458c2fa35a4389f0c311e9b
     FetchContent_MakeAvailable(googletest)
   endif()
 

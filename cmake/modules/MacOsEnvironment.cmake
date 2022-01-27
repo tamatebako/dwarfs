@@ -24,9 +24,6 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
-<<<<<<< HEAD
-if (CMAKE_HOST_SYSTEM_NAME MATCHES "Darwin")
-=======
 set(GNU_BASH "bash")
 
 if (CMAKE_HOST_SYSTEM_NAME MATCHES "Darwin")
@@ -34,7 +31,6 @@ if (CMAKE_HOST_SYSTEM_NAME MATCHES "Darwin")
 # If we are nor compiling it will be empty
 # Note that below for Bison, Flex and bash we are using host homebrew environment (just 'brew')
 # while other packages refer target environment potentially specified by BREW_BIN
->>>>>>> fa231155856b5bf50458c2fa35a4389f0c311e9b
     if(NOT BREW_BIN)
       set(BREW_BIN brew)
     endif()
@@ -44,11 +40,6 @@ if (CMAKE_HOST_SYSTEM_NAME MATCHES "Darwin")
         OUTPUT_VARIABLE BREW_PREFIX
         OUTPUT_STRIP_TRAILING_WHITESPACE
     )
-<<<<<<< HEAD
-    
-=======
-
->>>>>>> fa231155856b5bf50458c2fa35a4389f0c311e9b
     if(NOT (BREW_PREFIX_RES EQUAL 0 AND EXISTS ${BREW_PREFIX}))
         message(FATAL "Could not find brew setup")
     endif()
@@ -56,9 +47,9 @@ if (CMAKE_HOST_SYSTEM_NAME MATCHES "Darwin")
     message("Using brew environment at ${BREW_PREFIX}")
 
 # https://github.com/actions/virtual-environments/blob/main/images/macos/macos-10.15-Readme.md
-    set(ENV{OPENSSL_ROOT_DIR} "${BREW_PREFIX}/opt/openssl@1.1")
+    set(OPENSSL_ROOT_DIR "${BREW_PREFIX}/opt/openssl@1.1")
 
-    set(CMAKE_PREFIX_PATH ${BREW_PREFIX})
+    set(CMAKE_PREFIX_PATH "${BREW_PREFIX}")
     include_directories("${BREW_PREFIX}/include")
 
 # libarchive is keg-only, which means it was not symlinked into /usr/local,
@@ -106,5 +97,7 @@ if (CMAKE_HOST_SYSTEM_NAME MATCHES "Darwin")
 	set(CMAKE_CXX_ARCHIVE_CREATE "<CMAKE_AR> Scr <TARGET> <LINK_FLAGS> <OBJECTS>")
 	set(CMAKE_C_ARCHIVE_FINISH   "<CMAKE_RANLIB> -no_warning_for_no_symbols -c <TARGET>")
 	set(CMAKE_CXX_ARCHIVE_FINISH "<CMAKE_RANLIB> -no_warning_for_no_symbols -c <TARGET>")
+
+    set(CMAKE_CXX_FLAGS "-std=gnu++14 -DTARGET_OS_SIMULATOR=0 -DTARGET_OS_IPHONE=0")
 
 endif()

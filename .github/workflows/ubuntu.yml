@@ -38,11 +38,7 @@ on:
       - 'docs/**'
       - '**.adoc'
       - '**.md'
-<<<<<<< HEAD
-      - '.github/workflows/*.yml'      
-=======
       - '.github/workflows/*.yml'
->>>>>>> fa231155856b5bf50458c2fa35a4389f0c311e9b
       - '.github/workflows/ubuntu.yml'
   pull_request:
     branches: [ libdwarfs_wr* ]
