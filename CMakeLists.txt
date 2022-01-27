@@ -62,7 +62,7 @@ set(DEPS_SBIN_DIR ${DEPS}/sbin)
 #  MKD -- build library and mkdwarfs utility  [This is the configuration required for tebako]
 #  LIB -- build library only                  [This configuration is required for cross compilation of tebako packaged software]
 #                                             [For example in order to build MacOS arm64 package on MacOS x86_64               ]
-#  In the last case TEBAKO_BUILD_TARGET variable defines compiler -target setting but not for FbThrist, of course
+#  TEBAKO_BUILD_TARGET variable defines compiler -target setting but not for FbThrift, of course
 # -------------------------------------------------------------------------------------------------------------------------------
 
 if(NOT TEBAKO_BUILD_SCOPE)
@@ -79,16 +79,16 @@ if(NOT "${TEBAKO_BUILD_SCOPE}" STREQUAL "ALL" AND
    message(STATUS "Unknown build scope setting ${TEBAKO_BUILD_SCOPE}. Tebako build scope has been forcefully set to ALL")
    set(TEBAKO_BUILD_SCOPE "ALL")
 endif()
-if(TEBAKO_BUILD_TARGET)
-  if(NOT "${TEBAKO_BUILD_SCOPE}" STREQUAL "LIB")
-    message(WARNING "TEBAKO_BUILD_SCOPE is ${TEBAKO_BUILD_SCOPE}. TEBAKO_BUILD_TARGET will be ignored.")
-  else()
-    message("Building dwarfs library for ${TEBAKO_BUILD_TARGET}.")
-    set(TARGET ${TEBAKO_BUILD_TARGET})
-  endif()
-elseif("${TEBAKO_BUILD_SCOPE}" STREQUAL "LIB")
-  message(WARNING "TEBAKO_BUILD_SCOPE is LIB but TEBAKO_BUILD_TARGET is not set.")
-endif()
+#if(TEBAKO_BUILD_TARGET)
+#  if(NOT "${TEBAKO_BUILD_SCOPE}" STREQUAL "LIB")
+#    message(WARNING "TEBAKO_BUILD_SCOPE is ${TEBAKO_BUILD_SCOPE}. TEBAKO_BUILD_TARGET will be ignored.")
+#  else()
+#    message("Building dwarfs library for ${TEBAKO_BUILD_TARGET}.")
+#    set(TARGET ${TEBAKO_BUILD_TARGET})
+#  endif()
+#elseif("${TEBAKO_BUILD_SCOPE}" STREQUAL "LIB")
+#  message(WARNING "TEBAKO_BUILD_SCOPE is LIB but TEBAKO_BUILD_TARGET is not set.")
+#endif()
 
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   message(STATUS "Setting build type to '${default_build_type}'")
@@ -108,8 +108,9 @@ elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
   # for some reason, clang-10 and clang-11 binaries crash upon throwing exceptions
     add_compile_options(-fno-omit-frame-pointer)
   endif()
-  if(TARGET)
-    add_compile_options("--target=${TARGET}")
+  if(TEBAKO_BUILD_TARGET)
+    message("Building dwarfs library for ${TEBAKO_BUILD_TARGET}.")
+    add_compile_options("--target=${TEBAKO_BUILD_TARGET}")
   endif()
 endif()
 
