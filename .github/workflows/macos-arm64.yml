@@ -54,7 +54,7 @@ env:
   MAKEFLAGS: -j4
   CC: clang
   CXX: clang++
-  CXXFLAGS: -std=gnu++14 -DTARGET_OS_SIMULATOR=0 -DTARGET_OS_IPHONE=0
+#  CXXFLAGS: -std=gnu++14 -DTARGET_OS_SIMULATOR=0 -DTARGET_OS_IPHONE=0
 
 jobs:
   build:
@@ -73,7 +73,7 @@ jobs:
             xcode: '12.4'
             target: arm64
             scope: ALL
-            tests: 'ON'
+            tests: 'OFF'
 
     steps:
       - name: Select XCode
@@ -114,12 +114,12 @@ jobs:
 
       - name: Check aechitecture
         if: ${{ matrix.setup.tests == 'ON' }}
-        run: file build/dwarfs_test | grep 'arm64'
+        run: file build/mkdwarfs | grep 'arm64'
 
       - name: Upload test app
         if: ${{ matrix.setup.tests == 'ON' }}
         uses: actions/upload-artifact@v2
         with:
-          name: arm64-test
-          path: ${{github.workspace}}/build/dwarfs_test
+          name: arm64-mkdwarfs
+          path: ${{github.workspace}}/build/mkdwarfs
           retention-days: 1
