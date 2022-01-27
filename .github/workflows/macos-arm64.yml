@@ -95,8 +95,12 @@ jobs:
       - name: Install more packages
         run: |
           ./arm-brew-setup.sh ${{ github.workspace }}/..
-          ./arm-brew-install.sh ${{ github.workspace }}/.. libarchive double-conversion \
-                                boost jemalloc fmt glog openssl@1.1 libevent libsodium lz4 xz
+          ./arm-brew-install.sh ${{ github.workspace }}/.. \
+               libb2 lz4 xz zstd libarchive \
+               double-conversion libevent libsodium \
+               icu4c boost \
+               gflags glog \ 
+               openssl@1.1                 
 
       - name: Configure
         run: |
