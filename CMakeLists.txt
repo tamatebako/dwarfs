@@ -83,6 +83,7 @@ endif()
 if(TEBAKO_BUILD_TARGET)
   message("Building dwarfs for ${TEBAKO_BUILD_TARGET}.")
   add_compile_options("--target=${TEBAKO_BUILD_TARGET}")
+  add_link_options("--target=${TEBAKO_BUILD_TARGET}")
 endif()
 
 #if(TEBAKO_BUILD_TARGET)
