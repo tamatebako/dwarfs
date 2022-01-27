@@ -92,6 +92,7 @@ jobs:
 
       - name: Install packages for target host architecture
         run: |
+          mkdir ${{ github.workspace }}/deps
           ci-scripts/arm-brew-setup.sh ${{ github.workspace }}/deps
           ci-scripts/arm-brew-install.sh ${{ github.workspace }}/deps libb2 lz4 xz zstd libarchive       \
                                 icu4c boost jemalloc fmt gflags glog openssl@1.1 libevent libsodium \
