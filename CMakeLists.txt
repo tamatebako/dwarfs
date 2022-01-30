@@ -826,7 +826,7 @@ install(
   ARCHIVE DESTINATION lib)
 
 install(
-  DIRECTORY ${FBTHRIFT_SOURCE_DIR}/thrift/lib/cpp2 DESTINATION include/thrift/lib/cpp2
+  DIRECTORY ${FBTHRIFT_SOURCE_DIR}/thrift/lib/cpp2 DESTINATION include/thrift/lib
 )  
 
 # TODO: There's currently no point installing the library + headers, as these
