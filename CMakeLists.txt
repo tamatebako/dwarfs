@@ -817,6 +817,16 @@ foreach(man_dir ${MAN_DIRS})
   install(DIRECTORY "${man_dir}" DESTINATION share/man)
 endforeach()
 
+install(
+  TARGETS metadata_thrift thrift_light
+  RUNTIME DESTINATION bin
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib)
+
+install(
+  DIRECTORY ${FBTHRIFT_SOURCE_DIR}/thrift/lib/cpp2 DESTINATION include/thrift/lib/cpp2
+)  
+
 # TODO: There's currently no point installing the library + headers, as these
 # have dependencies on the bundled folly/thrift/... which we don't install.
 if(FALSE)
