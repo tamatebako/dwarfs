@@ -1,4 +1,6 @@
-# Copyright (c) 2022 [Ribose Inc](https://www.ribose.com).
+#! /bin/zsh
+#
+# Copyright (c) 2022, [Ribose Inc](https://www.ribose.com).
 # All rights reserved.
 # This file is a part of tebako
 #
@@ -23,25 +25,18 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-def_ext_prj_g(FBTHRIFT "fee4167")
+# More safety, by turning some bugs into errors.
 
-message(STATUS "Collecting fbthrift - " @${FBTHRIFT_TAG}  " at " ${FBTHRIFT_SOURCE_DIR})
+set -o errexit -o pipefail -o noclobber -o nounset
+setopt sh_word_split
 
-set(CMAKE_ARGUMENTS -DCMAKE_INSTALL_PREFIX=${DEPS}
-                    -DCMAKE_BUILD_TYPE=Release
-                    -Dcompiler_only:BOOL=ON
-)
-if(BUILD_CMAKE_ARGUMENTS)
-  list(APPEND CMAKE_ARGUMENTS ${BUILD_CMAKE_ARGUMENTS})
-endif()
+DIR0="$( cd "$1" && pwd )"
+DIR1="$DIR0/x86-homebrew"
 
-ExternalProject_Add(${FBTHRIFT_PRJ}
-  PREFIX "${DEPS}"
-  GIT_REPOSITORY "https://github.com/facebook/fbthrift.git"
-  GIT_TAG ${FBTHRIFT_TAG}
-  UPDATE_COMMAND ""
-  PATCH_COMMAND "${GNU_BASH}" "${CMAKE_CURRENT_SOURCE_DIR}/ci-scripts/patch-fbthrift.sh" "${FBTHRIFT_SOURCE_DIR}/CMakeLists.txt"
-  CMAKE_ARGS ${CMAKE_ARGUMENTS}
-  SOURCE_DIR ${FBTHRIFT_SOURCE_DIR}
-  BINARY_DIR ${FBTHRIFT_BINARY_DIR}
-)
+for bottle in "${@:2}"
+do
+    echo "Installing $bottle"
+    response=$("$DIR1/bin/brew" fetch --force --bottle-tag=x86_64_big_sur $bottle | grep "Downloaded to")
+    parsed=($response)
+    "$DIR1/bin/brew" install $parsed[3]
+done

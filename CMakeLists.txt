@@ -62,32 +62,37 @@ set(DEPS_SBIN_DIR ${DEPS}/sbin)
 #  MKD -- build library and mkdwarfs utility  [This is the configuration required for tebako]
 #  LIB -- build library only                  [This configuration is required for cross compilation of tebako packaged software]
 #                                             [For example in order to build MacOS arm64 package on MacOS x86_64               ]
-#  In the last case TEBAKO_BUILD_TARGET variable defines compiler -target setting but not for FbThrist, of course
+#  TEBAKO_BUILD_TARGET variable defines compiler -target setting but not for FbThrift, of course
 # -------------------------------------------------------------------------------------------------------------------------------
+
+if(TEBAKO_BUILD_TARGET)
+  message("Building dwarfs for ${TEBAKO_BUILD_TARGET}")
+  add_compile_options("--target=${TEBAKO_BUILD_TARGET}")
+  add_link_options("--target=${TEBAKO_BUILD_TARGET}")
+
+  if(WITH_TESTS)
+    message(WARNING "Cross-compiling amd tests are mutually exclusive. WITH_TESTS parameter was forced to OFF")
+    set(WITH_TESTS OFF)
+  endif()
+  if(WITH_BENCHMARKS)
+    message(WARNING "Cross-compiling amd benchmarking are mutually exclusive. WITH_BENCHMARKS parameter was forced to OFF")
+    set(WITH_BENCHMARKS OFF)
+  endif()
+endif()
 
 if(NOT TEBAKO_BUILD_SCOPE)
   set(TEBAKO_BUILD_SCOPE "ALL")
-  message("Tebako build scope is not specified and has been set to ALL")
+  message(STATUS "Tebako build scope is not specified and has been set to ALL")
 endif()
 if((WITH_TESTS OR WITH_BENCHMARKS) AND NOT "${TEBAKO_BUILD_SCOPE}" STREQUAL "ALL" )
   set(TEBAKO_BUILD_SCOPE "ALL")
-  message("WITH_TESTS or WITH_BENCHMARKS option was specified. Tebako build scope has been forcefully set to ALL")
+  message(STATUS "WITH_TESTS or WITH_BENCHMARKS option was specified. Tebako build scope has been forcefully set to ALL")
 endif()
 if(NOT "${TEBAKO_BUILD_SCOPE}" STREQUAL "ALL" AND
    NOT "${TEBAKO_BUILD_SCOPE}" STREQUAL "MKD" AND
    NOT "${TEBAKO_BUILD_SCOPE}" STREQUAL "LIB")
    message(STATUS "Unknown build scope setting ${TEBAKO_BUILD_SCOPE}. Tebako build scope has been forcefully set to ALL")
    set(TEBAKO_BUILD_SCOPE "ALL")
-endif()
-if(TEBAKO_BUILD_TARGET)
-  if(NOT "${TEBAKO_BUILD_SCOPE}" STREQUAL "LIB")
-    message(WARNING "TEBAKO_BUILD_SCOPE is ${TEBAKO_BUILD_SCOPE}. TEBAKO_BUILD_TARGET will be ignored.")
-  else()
-    message("Building dwarfs library for ${TEBAKO_BUILD_TARGET}.")
-    set(TARGET ${TEBAKO_BUILD_TARGET})
-  endif()
-elseif("${TEBAKO_BUILD_SCOPE}" STREQUAL "LIB")
-  message(WARNING "TEBAKO_BUILD_SCOPE is LIB but TEBAKO_BUILD_TARGET is not set.")
 endif()
 
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
@@ -107,9 +112,6 @@ elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
   if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "12.0.0")
   # for some reason, clang-10 and clang-11 binaries crash upon throwing exceptions
     add_compile_options(-fno-omit-frame-pointer)
-  endif()
-  if(TARGET)
-    add_compile_options("--target=${TARGET}")
   endif()
 endif()
 
