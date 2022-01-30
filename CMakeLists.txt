@@ -825,9 +825,8 @@ install(
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib)
 
-install(
-  DIRECTORY ${FBTHRIFT_SOURCE_DIR}/thrift/lib/cpp DESTINATION include/thrift/lib
-)
+install(DIRECTORY ${FBTHRIFT_SOURCE_DIR}/thrift/lib/cpp DESTINATION include/thrift/lib)
+install(DIRECTORY ${FBTHRIFT_SOURCE_DIR}/thrift/lib/cpp2 DESTINATION include/thrift/lib)
 
 # TODO: There's currently no point installing the library + headers, as these
 # have dependencies on the bundled folly/thrift/... which we don't install.
