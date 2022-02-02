@@ -115,6 +115,9 @@ elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
   endif()
 endif()
 
+add_compile_options(-fno-omit-frame-pointer)
+
+
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules")
 
 if(STATIC_BUILD_DO_NOT_USE)
