@@ -44,6 +44,10 @@ option(STATIC_BUILD_DO_NOT_USE "try static build (experimental)" OFF)
 
 set(default_build_type "Release")
 
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
 if (NOT DEPS)
   set(DEPS "${CMAKE_CURRENT_SOURCE_DIR}/deps")
   message("Using local setting for DEPS folder: ${DEPS}")
@@ -352,7 +356,6 @@ if(WITH_TESTS OR WITH_BENCHMARKS)
   add_library(test_helpers test/test_helpers.cpp test/test_strings.cpp
                            test/loremipsum.cpp)
   target_link_libraries(test_helpers dwarfs folly)
-  set_property(TARGET test_helpers PROPERTY CXX_STANDARD 17)
 endif()
 
 if(WITH_TESTS)
@@ -553,8 +556,6 @@ add_library(
   ${CMAKE_CURRENT_BINARY_DIR}/thrift/lib/thrift/gen-cpp2/frozen_data.cpp
   ${CMAKE_CURRENT_BINARY_DIR}/thrift/lib/thrift/gen-cpp2/frozen_types.cpp)
 
-set_property(TARGET thrift_light PROPERTY CXX_STANDARD 17)
-
 target_include_directories(thrift_light PRIVATE ${INCLUDE_DIRS})
 
 add_library(
@@ -562,8 +563,6 @@ add_library(
   ${CMAKE_CURRENT_BINARY_DIR}/thrift/dwarfs/gen-cpp2/metadata_layouts.cpp
   ${CMAKE_CURRENT_BINARY_DIR}/thrift/dwarfs/gen-cpp2/metadata_types.cpp
   ${CMAKE_CURRENT_BINARY_DIR}/thrift/dwarfs/gen-cpp2/metadata_data.cpp)
-
-set_property(TARGET metadata_thrift PROPERTY CXX_STANDARD 17)
 
 target_include_directories(metadata_thrift PRIVATE ${INCLUDE_DIRS})
 
@@ -587,10 +586,6 @@ foreach(tgt dwarfs ${BINARY_TARGETS})
             $<$<BOOL:${WITH_PYTHON}>:DWARFS_HAVE_PYTHON>)
 
   target_compile_options(${tgt} PRIVATE -Wall -Wextra -pedantic)
-
-  set_property(TARGET ${tgt} PROPERTY CXX_STANDARD 17)
-  set_property(TARGET ${tgt} PROPERTY CXX_STANDARD_REQUIRED ON)
-  set_property(TARGET ${tgt} PROPERTY CXX_EXTENSIONS OFF)
 
   add_dependencies(${tgt} metadata_thrift)
 
