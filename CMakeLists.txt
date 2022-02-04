@@ -119,6 +119,9 @@ elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
   endif()
 endif()
 
+add_compile_options(-fno-omit-frame-pointer)
+
+
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules")
 
 if(STATIC_BUILD_DO_NOT_USE)
@@ -813,6 +816,15 @@ install(
 foreach(man_dir ${MAN_DIRS})
   install(DIRECTORY "${man_dir}" DESTINATION share/man)
 endforeach()
+
+install(
+  TARGETS metadata_thrift thrift_light
+  RUNTIME DESTINATION bin
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib)
+
+install(DIRECTORY ${FBTHRIFT_SOURCE_DIR}/thrift/lib/cpp DESTINATION include/thrift/lib)
+install(DIRECTORY ${FBTHRIFT_SOURCE_DIR}/thrift/lib/cpp2 DESTINATION include/thrift/lib)
 
 # TODO: There's currently no point installing the library + headers, as these
 # have dependencies on the bundled folly/thrift/... which we don't install.

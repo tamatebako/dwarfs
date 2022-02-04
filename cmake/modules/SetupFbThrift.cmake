@@ -23,7 +23,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-def_ext_prj_g(FBTHRIFT "fee4167")
+def_ext_prj_g(FBTHRIFT "45bea52")
 
 message(STATUS "Collecting fbthrift - " @${FBTHRIFT_TAG}  " at " ${FBTHRIFT_SOURCE_DIR})
 
