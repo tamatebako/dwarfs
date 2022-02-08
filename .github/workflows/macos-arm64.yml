@@ -27,8 +27,6 @@
 # in specific environment. Due to this reason there is no caching. It is done by
 # intention. All caching is in upstream projects.
 #
-# Also this file contains comments that will be useful is dwarfs has to be build
-# in different environment, not GHA.
 name: MacOS-arm64
 
 on:
@@ -54,7 +52,6 @@ env:
   MAKEFLAGS: -j4
   CC: clang
   CXX: clang++
-#  CXXFLAGS: -std=gnu++14 -DTARGET_OS_SIMULATOR=0 -DTARGET_OS_IPHONE=0
 
 jobs:
   build:
