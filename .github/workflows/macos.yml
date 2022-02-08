@@ -118,4 +118,3 @@ jobs:
         run: |
           cd build
           make test
-          

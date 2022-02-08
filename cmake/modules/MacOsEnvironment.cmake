@@ -27,8 +27,8 @@
 set(GNU_BASH "bash")
 
 if (CMAKE_HOST_SYSTEM_NAME MATCHES "Darwin")
-# If we are cross compiling BREW_BIN will point to homebrew environment for target
-# If we are nor compiling it will be empty
+# If we are cross compiling TARGET_HOMEBREW will point to homebrew environment for target
+# If we are not cross-compiling it will be empty
 # Note that below for Bison, Flex and bash we are using host homebrew environment (just 'brew')
 # while other packages refer target environment potentially specified by BREW_BIN
   execute_process(
