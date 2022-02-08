@@ -33,15 +33,13 @@ name: Ubuntu
 
 on:
   push:
-    branches: [ libdwarfs_wr ]
     paths-ignore:
       - 'docs/**'
       - '**.adoc'
       - '**.md'
       - '.github/workflows/*.yml'
-      - '.github/workflows/ubuntu.yml'
+      - '!.github/workflows/ubuntu.yml'
   pull_request:
-    branches: [ libdwarfs_wr* ]
     paths-ignore:
       - 'docs/**'
       - '**.adoc'

@@ -31,7 +31,6 @@ name: MacOS-arm64
 
 on:
   push:
-    branches: [ libdwarfs_wr ]
     paths-ignore:
       - 'docs/**'
       - '**.adoc'
@@ -39,7 +38,6 @@ on:
       - '.github/workflows/*.yml'
       - '!.github/workflows/macos-arm64.yml'
   pull_request:
-    branches: [ libdwarfs_wr* ]
     paths-ignore:
       - 'docs/**'
       - '**.adoc'
