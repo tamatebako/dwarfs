@@ -103,7 +103,6 @@ if (CMAKE_HOST_SYSTEM_NAME MATCHES "Darwin")
 # because macOS already provides this software and installing another version in
 # parallel can cause all kinds of trouble.
   set(ENV{PKG_CONFIG_PATH} "${TARGET_BREW_PREFIX}/opt/libarchive/lib/pkgconfig:$ENV{PKG_CONFIG_PATH}")
-  message("Pkg config path $ENV{PKG_CONFIG_PATH}")
 
 # Suppress superfluous randlib warnings about "*.a" having no symbols on MacOSX.
   set(CMAKE_C_ARCHIVE_CREATE   "<CMAKE_AR> Scr <TARGET> <LINK_FLAGS> <OBJECTS>")
