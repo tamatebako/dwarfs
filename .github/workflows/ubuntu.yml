@@ -1,4 +1,4 @@
-# Copyright (c) 2021, [Ribose Inc](https://www.ribose.com).
+# Copyright (c) 2021-2022, [Ribose Inc](https://www.ribose.com).
 # All rights reserved.
 # This file is a part of tamatebako
 #
@@ -33,35 +33,44 @@ name: Ubuntu
 
 on:
   push:
-    branches: [ libdwarfs_wr* ]
+    branches: [ libdwarfs_wr ]
     paths-ignore:
       - 'docs/**'
       - '**.adoc'
       - '**.md'
-      - '.github/workflows/macos.yml'
+      - '.github/workflows/*.yml'
+      - '.github/workflows/ubuntu.yml'
   pull_request:
     branches: [ libdwarfs_wr* ]
     paths-ignore:
       - 'docs/**'
       - '**.adoc'
       - '**.md'
-      - '.github/workflows/macos.yml'
+      - '.github/workflows/*.yml'
+      - '!.github/workflows/ubuntu.yml'
   workflow_dispatch:
 
 env:
   MAKEFLAGS: -j4
 # Ruby  (this is required for ronn)
-  RUBY_VER:   "2.7.4"
+  RUBY_VER:   "2.7.5"
 
 jobs:
   build:
-    name: ${{ matrix.os }} [${{ matrix.env.CC }}, ${{ matrix.mode }}]
+    name: ${{ matrix.os }} [${{ matrix.env.CC }}, ${{ matrix.setup.scope }}]
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         os: [ ubuntu-18.04, ubuntu-20.04 ]
-        mode: [ full, tebako-optimized ]
+#  We are running two configurations:
+#   - ALL in order to run regression tests
+#   - MKD just to be sure that it build ok
+        setup:
+          - scope: 'ALL'
+            tests: 'ON'
+          - scope: 'MKD'
+            tests: 'OFF'
         env:
           - CC: gcc
             CXX: g++
@@ -109,27 +118,27 @@ jobs:
           sudo apt-get -y install \
           binutils-dev libarchive-dev libevent-dev acl-dev libarchive-dev \
           libdouble-conversion-dev libiberty-dev liblz4-dev libssl-dev liblzma-dev \
-          libunwind-dev libdwarf-dev libelf-dev libgoogle-glog-dev libgtest-dev \
+          libunwind-dev libdwarf-dev libelf-dev libgoogle-glog-dev \
           libboost-filesystem-dev libboost-program-options-dev libboost-system-dev \
           libboost-date-time-dev libboost-context-dev libboost-regex-dev libboost-thread-dev
 
       - name: Install libfuse 2 (bionic)
-        if: ${{ matrix.os == 'ubuntu-18.04' && matrix.mode == 'full' }}
+        if: ${{ matrix.os == 'ubuntu-18.04' && matrix.setup.scope == 'ALL' }}
         run: |
           sudo apt-get install libfuse-dev
 
       - name: Install libfuse 3  (focal)
-        if: ${{ matrix.os == 'ubuntu-20.04' && matrix.mode == 'full' }}
+        if: ${{ matrix.os == 'ubuntu-20.04' && matrix.mode == 'ALL' }}
         run: |
           sudo apt-get install libfuse3-dev
 
       - name: Remove libfuse 2 (bionic, tebako-optimized mode)
-        if: ${{ matrix.os == 'ubuntu-18.04' && matrix.mode == 'tebako-optimized' }}
+        if: ${{ matrix.os == 'ubuntu-18.04' && matrix.mode == 'MKD' }}
         run: |
           sudo apt-get remove fuse libfuse-dev
 
       - name: Remove libfuse 3 (focal, tebako-optimized mode)
-        if: ${{ matrix.os == 'ubuntu-20.04' && matrix.mode == 'tebako-optimized' }}
+        if: ${{ matrix.os == 'ubuntu-20.04' && matrix.mode == 'MKD' }}
         run: |
           sudo apt-get remove fuse3 libfuse3-dev fuse libfuse-dev
 
@@ -166,20 +175,20 @@ jobs:
 # Note that libruby-dev is required under the hood
 
       - name: Install Ruby
-        if: ${{ matrix.mode == 'full' }}
+        if: ${{ matrix.mode == 'ALL' }}
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: ${{ env.RUBY_VER }}
 
       - name: Install ronn
-        if: ${{ matrix.mode == 'full' }}
+        if: ${{ matrix.mode == 'ALL' }}
         run: sudo gem install ronn
 
       - name: Configure
         run: |
           mkdir build
           cd build
-          cmake .. -DWITH_TESTS=1 -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/install
+          cmake .. -DWITH_TESTS=${{ matrix.setup.tests }} -DTEBAKO_BUILD_SCOPE=${{ matrix.setup.scope }} -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/install
 
       - name: Build
         run: |
@@ -187,6 +196,7 @@ jobs:
           make -j4
 
       - name: Test
+        if: ${{ matrix.setup.tests == 'ON' }}
         run: |
           cd build
           make test

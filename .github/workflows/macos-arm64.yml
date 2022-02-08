@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022, [Ribose Inc](https://www.ribose.com).
+# Copyright (c) 2022, [Ribose Inc](https://www.ribose.com).
 # All rights reserved.
 # This file is a part of tamatebako
 #
@@ -27,9 +27,7 @@
 # in specific environment. Due to this reason there is no caching. It is done by
 # intention. All caching is in upstream projects.
 #
-# Also this file contains comments that will be useful is dwarfs has to be build
-# in different environment, not GHA.
-name: MacOS
+name: MacOS-arm64
 
 on:
   push:
@@ -39,7 +37,7 @@ on:
       - '**.adoc'
       - '**.md'
       - '.github/workflows/*.yml'
-      - '!.github/workflows/macos.yml'
+      - '!.github/workflows/macos-arm64.yml'
   pull_request:
     branches: [ libdwarfs_wr* ]
     paths-ignore:
@@ -47,45 +45,35 @@ on:
       - '**.adoc'
       - '**.md'
       - '.github/workflows/*.yml'
-      - '!.github/workflows/macos.yml'
+      - '!.github/workflows/macos-arm64.yml'
   workflow_dispatch:
 
 env:
   MAKEFLAGS: -j4
   CC: clang
   CXX: clang++
-  CXXFLAGS: -std=gnu++14 -DTARGET_OS_SIMULATOR=0 -DTARGET_OS_IPHONE=0
 
 jobs:
   build:
-    name: "macos-${{ matrix.setup.version }} [ scope:${{ matrix.setup.scope }} ]"
+    name: "macos-${{ matrix.setup.version }} [target:${{ matrix.setup.target }}, scope:${{ matrix.setup.scope }}]"
     runs-on: macos-${{ matrix.setup.version }}
     strategy:
       fail-fast: false
-#  We are running two configurations:
-#   - ALL in order to run regression tests
-#   - MKD just to be sure that it build ok
       matrix:
         setup:
-          - version: '10.15'
-            xcode: '12.1.1'
-            scope: 'ALL'
-            tests: 'ON'
-          - version: '10.15'
-            xcode: '12.1.1'
-            scope: 'MKD'
+          - version: '11.0'
+            xcode: '12.4'
+            target: arm64
+            scope: LIB
             tests: 'OFF'
           - version: '11.0'
             xcode: '12.4'
-            scope: 'ALL'
-            tests: 'ON'
-          - version: '11.0'
-            xcode: '12.4'
-            scope: 'MKD'
+            target: arm64
+            scope: ALL
             tests: 'OFF'
 
     steps:
-      - name: Select XCode version
+      - name: Select XCode
         uses: maxim-lobanov/setup-xcode@v1
         with:
           xcode-version: ${{ matrix.setup.xcode }}
@@ -95,17 +83,26 @@ jobs:
         with:
           submodules: true
 
-      - name: Install packages
+      - name: Install packages for build host architecture
         run: |
-          brew install  \
-          bison flex gnu-sed bash boost libarchive double-conversion jemalloc fmt glog
+          brew install bison flex gnu-sed bash glog gflags icu4c boost
+
+# Note: we cannot rely on dependencies here since resolved dependencies will point to x86_64 version
+      - name: Install packages for target host architecture
+        run: |
+          ci-scripts/arm-brew-setup.sh ${{ github.workspace }}/..
+          ci-scripts/arm-brew-install.sh ${{ github.workspace }}/.. libb2 lz4 xz zstd libarchive    \
+                                icu4c boost jemalloc fmt gflags glog openssl@1.1 libevent libsodium \
+                                double-conversion
 
       - name: Configure
         run: |
           mkdir build
           cd build
-          cmake .. -DWITH_TESTS=${{ matrix.setup.tests }}         \
-                   -DTEBAKO_BUILD_SCOPE=${{ matrix.setup.scope }} \
+          cmake .. -DTARGET_HOMEBREW=${{ github.workspace }}/../arm-homebrew                               \
+                   -DWITH_TESTS=${{ matrix.setup.tests }}                                                  \
+                   -DTEBAKO_BUILD_SCOPE=${{ matrix.setup.scope }}                                          \
+                   -DTEBAKO_BUILD_TARGET=${{ matrix.setup.target }}-apple-macos${{ matrix.setup.version }} \
                    -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/install
 
       - name: Build
@@ -113,8 +110,14 @@ jobs:
           cd build
           make -j4
 
-      - name: Test
-        if: ${{ matrix.setup.tests == 'ON' }}
-        run: |
-          cd build
-          make test
+      - name: Check aechitecture
+        if: ${{ matrix.setup.scope == 'ALL' }}
+        run: file build/mkdwarfs | grep 'arm64'
+
+      - name: Upload test app
+        if: ${{ matrix.setup.scope == 'ALL' }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: arm64-mkdwarfs
+          path: ${{github.workspace}}/build/mkdwarfs
+          retention-days: 1

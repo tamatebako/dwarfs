@@ -14,5 +14,8 @@
 .vscode/
 out/
 CMakeSettings.json
-fbthrift/
 jemalloc/
+
+# More build artifacts
+arm-homebrew/
+deps/
