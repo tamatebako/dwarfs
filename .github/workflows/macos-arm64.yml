@@ -31,7 +31,7 @@ name: MacOS-arm64
 
 on:
   push:
-    branches: [ libdwarfs_wr* ]
+    branches: [ libdwarfs_wr ]
     paths-ignore:
       - 'docs/**'
       - '**.adoc'

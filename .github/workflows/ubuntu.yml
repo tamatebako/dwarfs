@@ -33,7 +33,7 @@ name: Ubuntu
 
 on:
   push:
-    branches: [ libdwarfs_wr* ]
+    branches: [ libdwarfs_wr ]
     paths-ignore:
       - 'docs/**'
       - '**.adoc'
