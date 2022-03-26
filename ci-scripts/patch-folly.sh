@@ -35,45 +35,8 @@ restore_and_save() {
   cp -f "$1" "$1.old"
 }
 
-# ....................................................
-# Surprise, surprise ... Upstream project shall found boost libraries for fbthrift
-# https://github.com/facebook/fbthrift/commit/c23af9dee42374d43d2f10e0e07edf1c1c97c328
-
-
-if [[ "$OSTYPE" == "linux-gnu"* || "$OSTYPE" == "linux-musl"* ]]; then
-  gSed="sed"
-
-# shellcheck disable=SC2251
-! IFS= read -r -d '' sbst << EOM
-find_package(OpenSSL REQUIRED)
-# -- Start of tebako patch --
-find_package(Boost 1.65 REQUIRED COMPONENTS filesystem)
-include_directories(\${Boost_INCLUDE_DIRS})
-# -- End of tebako patch --
-EOM
-
-elif [[ "$OSTYPE" == "darwin"* ]]; then
-  gSed="gsed"
-
-# shellcheck disable=SC2251
-! IFS= read -r -d '' sbst << EOM
-find_package(OpenSSL REQUIRED)
-# -- Start of tebako patch --
-find_package(Boost 1.65 REQUIRED COMPONENTS filesystem)
-include_directories(\${Boost_INCLUDE_DIRS})
-# Suppress superfluous randlib warnings about \"*.a\" having no symbols on MacOSX.
-set(CMAKE_C_ARCHIVE_CREATE   \"<CMAKE_AR> Scr <TARGET> <LINK_FLAGS> <OBJECTS>\")
-set(CMAKE_CXX_ARCHIVE_CREATE \"<CMAKE_AR> Scr <TARGET> <LINK_FLAGS> <OBJECTS>\")
-set(CMAKE_C_ARCHIVE_FINISH   \"<CMAKE_RANLIB> -no_warning_for_no_symbols -c <TARGET>\")
-set(CMAKE_CXX_ARCHIVE_FINISH \"<CMAKE_RANLIB> -no_warning_for_no_symbols -c <TARGET>\")
-# -- End of tebako patch --
-EOM
-
-else
-  echo "Unknown OSTYPE=$OSTYPE"
-  exit 1
-fi
-
+# https://github.com/facebook/folly/issues/1478
 restore_and_save "$1"
-re="find_package(OpenSSL REQUIRED)"
-"$gSed" -i "s/$re/${sbst//$'\n'/"\\n"}/g" "$1"
+re="#elif defined(__FreeBSD__)"
+sbst="#elif !defined(__gnu_linux__)    \/\/ Tebako patch"
+sed -i "s/$re/$sbst/g" "$1"
