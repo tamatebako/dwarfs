@@ -89,7 +89,11 @@ jobs:
         run: |
           wget -q https://github.com/jemalloc/jemalloc/releases/download/5.2.1/jemalloc-5.2.1.tar.bz2
           tar -xf jemalloc-5.2.1.tar.bz2
+          pwd
+          ls -l
           cd jemalloc-5.2.1
+          pwd
+          ls -l
           bash ../ci-scripts/patch-jemalloc.sh include/jemalloc/jemalloc_macros.h.in
           ./configure
           make -j4
