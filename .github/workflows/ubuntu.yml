@@ -114,7 +114,7 @@ jobs:
         run: |
           sudo apt-get -y update
           sudo apt-get -y install \
-          binutils-dev libarchive-dev libevent-dev acl-dev libarchive-dev \
+          binutils-dev libarchive-dev libevent-dev acl-dev \
           libdouble-conversion-dev libiberty-dev liblz4-dev libssl-dev liblzma-dev \
           libunwind-dev libdwarf-dev libelf-dev libgoogle-glog-dev \
           libboost-filesystem-dev libboost-program-options-dev libboost-system-dev \
@@ -125,7 +125,7 @@ jobs:
         run: |
           sudo apt-get install libfuse-dev
 
-      - name: Install libfuse 3  (focal)
+      - name: Install libfuse 3 (focal)
         if: ${{ matrix.os == 'ubuntu-20.04' && matrix.mode == 'ALL' }}
         run: |
           sudo apt-get install libfuse3-dev
@@ -157,7 +157,7 @@ jobs:
         if: ${{ matrix.os != 'ubuntu-18.04' || matrix.env.CC != 'clang' }}
         run: sudo apt-get -y install libjemalloc-dev
 
-      - name: Install libjemalloc 5 (bionic and clang)
+      - name: Build libjemalloc 5 (bionic and clang)
         if: ${{ matrix.os == 'ubuntu-18.04' && matrix.env.CC == 'clang' }}
         run: |
           sudo apt-get remove libjemalloc-dev

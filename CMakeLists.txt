@@ -18,7 +18,7 @@
 cmake_minimum_required(VERSION 3.20.0)
 
 cmake_policy(SET CMP0048 NEW)
-project(tebako-dwarfs VERSION 0.1.7)
+project(tebako-dwarfs VERSION 0.1.8)
 
 include(ExternalProject)
 include(FetchContent)
@@ -121,7 +121,6 @@ endif()
 
 add_compile_options(-fno-omit-frame-pointer)
 
-
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules")
 
 if(STATIC_BUILD_DO_NOT_USE)
@@ -210,6 +209,21 @@ set(ZSTD_INCLUDE_DIR
     CACHE PATH "don't build folly with zstd" FORCE)
 
 add_subdirectory(folly EXCLUDE_FROM_ALL)
+
+set(FOLLY_FILE_TO_PATCH "${CMAKE_CURRENT_SOURCE_DIR}/folly/folly/experimental/symbolizer/Elf.cpp")
+execute_process(
+  COMMAND "${GNU_BASH}"
+          "${CMAKE_CURRENT_SOURCE_DIR}/ci-scripts/patch-folly.sh"
+          "${FOLLY_FILE_TO_PATCH}"
+  RESULT_VARIABLE PATCH_FOLLY_RES
+  OUTPUT_VARIABLE PATCH_FOLLY_TXT
+)
+
+if(PATCH_FOLLY_RES EQUAL 0)
+  message(STATUS "Patched '${FOLLY_FILE_TO_PATCH}'")
+else(PATCH_FOLLY_RES EQUAL 0)
+  message(FATAL "Failed to patch '${FOLLY_FILE_TO_PATCH}': ${PATH_FOLLY_TXT}")
+endif(PATCH_FOLLY_RES EQUAL 0)
 
 if(NOT (ZSTD_FOUND AND PREFER_SYSTEM_ZSTD))
   add_subdirectory(zstd/build/cmake EXCLUDE_FROM_ALL)
