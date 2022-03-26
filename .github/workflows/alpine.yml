@@ -85,24 +85,20 @@ jobs:
             libunwind-dev libdwarf-dev glog-dev elfutils-dev       \
             fuse3-dev clang 
 
-      - name: Build libjemalloc
-        run: |
-          wget -q https://github.com/jemalloc/jemalloc/releases/download/5.2.1/jemalloc-5.2.1.tar.bz2
-          tar -xf jemalloc-5.2.1.tar.bz2
-          pwd
-          ls -l
-          cd jemalloc-5.2.1
-          pwd
-          ls -l
-          bash ../ci-scripts/patch-jemalloc.sh include/jemalloc/jemalloc_macros.h.in
-          ./configure
-          make -j4
-          make install
-
       - name: Checkout
         uses: actions/checkout@v2
         with:
           submodules: true
+
+      - name: Build libjemalloc
+        run: |
+          wget -q https://github.com/jemalloc/jemalloc/releases/download/5.2.1/jemalloc-5.2.1.tar.bz2
+          tar -xf jemalloc-5.2.1.tar.bz2
+          cd jemalloc-5.2.1
+          bash ../ci-scripts/patch-jemalloc.sh include/jemalloc/jemalloc_macros.h.in
+          ./configure
+          make -j4
+          make install
 
       - name: Configure
         run: |
