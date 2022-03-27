@@ -96,7 +96,7 @@ jobs:
 
       - name: Patch system includes
         if: ${{ matrix.env.CC == 'clang' }}
-        run: ${{ github.workspace }}/ci-scripts/patch-system-includes.sh
+        run: ci-scripts/patch-system-includes.sh
 
       - name: Build libjemalloc
         run: |
@@ -111,7 +111,7 @@ jobs:
         run: |
           mkdir build
           cd build
-          cmake .. -DWITH_TESTS=${{ matrix.setup.tests }} -DTEBAKO_BUILD_SCOPE=${{ matrix.setup.scope }} -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/install
+          cmake .. -DWITH_TESTS=${{ matrix.setup.tests }} -DTEBAKO_BUILD_SCOPE=${{ matrix.setup.scope }} -DCMAKE_INSTALL_PREFIX=install
 
       - name: Build
         run: |
