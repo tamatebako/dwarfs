@@ -24,6 +24,10 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+# Alpine headers define malloc and other memory functions without nothrow attribute
+# while jemalloc and folly have nothrow
+# clang (as opposed to gcc) considers it syntax error and there is no easier workaround
+
 set -o errexit -o pipefail -o noclobber -o nounset
 
 # ....................................................

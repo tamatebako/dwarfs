@@ -24,8 +24,6 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-# More safety, by turning some bugs into errors.
-
 set -o errexit -o pipefail -o noclobber -o nounset
 
 # ....................................................
@@ -38,5 +36,5 @@ restore_and_save() {
 # https://github.com/facebook/folly/issues/1478
 restore_and_save "$1"
 re="#elif defined(__FreeBSD__)"
-sbst="#elif !defined(__gnu_linux__)    \/\/ Tebako patch"
+sbst="#else    \/* Tebako patched *\/" 
 sed -i "s/$re/$sbst/g" "$1"
