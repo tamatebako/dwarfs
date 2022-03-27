@@ -36,6 +36,6 @@ restore_and_save() {
 }
 
 restore_and_save "$1"
-re="#  define JEMALLOC_NOTHROW JEMALLOC_ATTR(nothrow)"
-sbst="#  define JEMALLOC_NOTHROW    \/\/ Tebako patch"
+re="JEMALLOC_ATTR(nothrow)"
+sbst=" "
 sed -i "s/$re/$sbst/g" "$1"
