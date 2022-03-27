@@ -25,6 +25,8 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+# More safety, by turning some bugs into errors.
+
 set -o errexit -o pipefail -o noclobber -o nounset
 
 # for zsh
@@ -32,12 +34,4 @@ set -o errexit -o pipefail -o noclobber -o nounset
 # setopt sh_word_split
 
 DIR0="$( cd "$1" && pwd )"
-DIR1="$DIR0/arm-homebrew"
-
-for bottle in "${@:2}"
-do
-    echo "Installing $bottle"
-    response=$("$DIR1/bin/brew" fetch --force --bottle-tag=arm64_big_sur "$bottle" | grep "Downloaded to")
-    IFS=" " read -r -a parsed <<< "$response"
-    "$DIR1/bin/brew" install "${parsed[2]}"
-done
+echo "$DIR0"
