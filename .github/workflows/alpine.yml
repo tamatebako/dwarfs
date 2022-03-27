@@ -69,6 +69,10 @@ jobs:
         env:
           - CC: gcc
             CXX: g++
+# clang cannot be used
+# Alpine headers define malloc and other memory functions without nothrow attribute
+# while jemalloc and folly have nothrow
+# clang (as opposed to gcc) considers it syntax error and there is no simple workaround (?)
           - CC: clang
             CXX: clang++
     env: ${{ matrix.env }}
@@ -90,11 +94,15 @@ jobs:
         with:
           submodules: true
 
+      - name: Patch system includes
+        if: ${{ matrix.env.CC == 'clang' }}
+        run: ${{ github.workspace }}/ci-scripts/patch-system-includes.sh
+
       - name: Build libjemalloc
         run: |
-          wget -q https://github.com/jemalloc/jemalloc/releases/download/3.6.0/jemalloc-3.6.0.tar.bz2
-          tar -xf jemalloc-3.6.0.tar.bz2
-          cd jemalloc-3.6.0
+          wget -q https://github.com/jemalloc/jemalloc/releases/download/5.2.1/jemalloc-5.2.1.tar.bz2
+          tar -xf jemalloc-5.2.1.tar.bz2
+          cd jemalloc-5.2.1
           ./configure
           make -j4
           make install
@@ -103,7 +111,7 @@ jobs:
         run: |
           mkdir build
           cd build
-          cmake .. -DWITH_TESTS=${{ matrix.setup.tests }} -DTEBAKO_BUILD_SCOPE=${{ matrix.setup.scope }} -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/install
+          cmake .. -DWITH_TESTS=${{ matrix.setup.tests }} -DTEBAKO_BUILD_SCOPE=${{ matrix.setup.scope }} -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/install
 
       - name: Build
         run: |
