@@ -97,9 +97,9 @@ jobs:
       - name: Install packages for target host architecture
         run: |
           ${{ env.BREW_HOME }}/bin/bash ci-scripts/arm-brew-setup.sh ${{ env.LEVEL_UP }}
-          ${{ env.BREW_HOME }}/bin/bash ci-scripts/arm-brew-install.sh ${{ env.LEVEL_UP }} libb2 lz4    \ 
-                                xz zstd libarchive icu4c boost jemalloc fmt gflags glog openssl@1.1     \
-                                libevent libsodium double-conversion
+          ${{ env.BREW_HOME }}/bin/bash ci-scripts/arm-brew-install.sh ${{ env.LEVEL_UP }} libb2 lz4   \
+                                xz zstd zlib libarchive icu4c boost fmt openssl@1.1 libevent libsodium \
+                                double-conversion gflags glog jemalloc
 
       - name: Configure
         run: |
