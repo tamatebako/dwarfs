@@ -12,4 +12,4 @@
 	url = https://github.com/greg7mdp/parallel-hashmap
 [submodule "tools"]
 	path = tools
-	url = ./tools
+	url = https://github.com/tamatebako/macos-cross-compile
