@@ -78,12 +78,21 @@ jobs:
     steps:
       - name: Install packages
         run: |
-          apk --no-cache --upgrade add build-base cmake git bash   \
+          apk --no-cache --upgrade add cmake git bash build-base   \
             autoconf boost-static boost-dev fmt-dev flex-dev bison \
             binutils-dev libarchive-dev libevent-dev acl-dev       \
             double-conversion-dev lz4-dev openssl-dev xz-dev       \
             libunwind-dev libdwarf-dev glog-dev elfutils-dev       \
-            fuse3-dev clang 
+            fuse3-dev clang-dev
+
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: true
+
+      - name: Patch system includes
+        if: ${{ matrix.env.CC == 'clang' }}
+        run: tools/ci-scripts/patch-system-includes.sh
 
       - name: Build libjemalloc
         run: |
@@ -94,16 +103,11 @@ jobs:
           make -j4
           make install
 
-      - name: Checkout
-        uses: actions/checkout@v2
-        with:
-          submodules: true
-
       - name: Configure
         run: |
           mkdir build
           cd build
-          cmake .. -DWITH_TESTS=${{ matrix.setup.tests }} -DTEBAKO_BUILD_SCOPE=${{ matrix.setup.scope }} -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/install
+          cmake .. -DWITH_TESTS=${{ matrix.setup.tests }} -DTEBAKO_BUILD_SCOPE=${{ matrix.setup.scope }} -DCMAKE_INSTALL_PREFIX=install
 
       - name: Build
         run: |

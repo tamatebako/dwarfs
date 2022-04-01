@@ -117,6 +117,24 @@ elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
   # for some reason, clang-10 and clang-11 binaries crash upon throwing exceptions
     add_compile_options(-fno-omit-frame-pointer)
   endif()
+  execute_process(
+    COMMAND "${GNU_BASH}" 
+            "-c"
+            "echo \$OSTYPE"
+    RESULT_VARIABLE OSTYPE_RES
+    OUTPUT_VARIABLE OSTYPE_TXT
+  )
+  if(OSTYPE_RES EQUAL 0)
+    message(STATUS "OSTYPE: '${OSTYPE_TXT}'")
+  else(OSTYPE_RES EQUAL 0)
+    message(FATAL "Failed to detect OSTYPE: ${OSTYPE_TXT}")
+  endif(OSTYPE_RES EQUAL 0)
+
+  string(REGEX MATCH "^linux-musl.*" IS_CLANG_AND_MUSL "${OSTYPE_TXT}")
+  if(IS_CLANG_AND_MUSL)
+    message(STATUS "Clang and musl")
+    add_compile_definitions(__musl__)
+  endif(IS_CLANG_AND_MUSL)
 endif()
 
 add_compile_options(-fno-omit-frame-pointer)
@@ -207,6 +225,21 @@ endif()
 set(ZSTD_INCLUDE_DIR
     ""
     CACHE PATH "don't build folly with zstd" FORCE)
+
+set(FOLLY_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/folly")
+execute_process(
+  COMMAND "${GNU_BASH}"
+          "${CMAKE_CURRENT_SOURCE_DIR}/tools/ci-scripts/patch-folly.sh"
+          "${FOLLY_ROOT}"
+  RESULT_VARIABLE PATCH_FOLLY_RES
+  OUTPUT_VARIABLE PATCH_FOLLY_TXT
+)
+    
+if(PATCH_FOLLY_RES EQUAL 0)
+  message(STATUS "Patched folly at '${FOLLY_ROOT}'")
+else(PATCH_FOLLY_RES EQUAL 0)
+  message(FATAL "Failed to patch folly at '${FOLLY_ROOT}': ${PATH_FOLLY_TXT}")
+endif(PATCH_FOLLY_RES EQUAL 0)
 
 add_subdirectory(folly EXCLUDE_FROM_ALL)
 
