@@ -19,3 +19,4 @@ jemalloc/
 # More build artifacts
 arm-homebrew/
 deps/
+*.old
