@@ -83,12 +83,7 @@ jobs:
             binutils-dev libarchive-dev libevent-dev acl-dev       \
             double-conversion-dev lz4-dev openssl-dev xz-dev       \
             libunwind-dev libdwarf-dev glog-dev elfutils-dev       \
-            fuse3-dev
-
-      - name: Install packages
-        if: ${{ matrix.env.CC == 'clang' }}
-        run: |
-          apk --no-cache --upgrade add clang-dev
+            fuse3-dev clang-dev
 
       - name: Checkout
         uses: actions/checkout@v3
@@ -97,9 +92,7 @@ jobs:
 
       - name: Patch system includes
         if: ${{ matrix.env.CC == 'clang' }}
-        run: |
-          tools/ci-scripts/patch-system-includes.sh
-          patch folly/CMake/FollyConfigChecks.cmake tools/ci-scripts/patches/FollyConfigChecks.cmake.patch -f          
+        run: tools/ci-scripts/patch-system-includes.sh
 
       - name: Build libjemalloc
         run: |
