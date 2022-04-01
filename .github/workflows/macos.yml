@@ -93,12 +93,6 @@ jobs:
         with:
           submodules: true
 
-      - name: Checkout tools repo
-        uses: actions/checkout@v3
-        with:
-          repository: tamatebako/macos-cross-compile
-          path: tools
-
       - name: Install packages
         run: |
           brew install  \

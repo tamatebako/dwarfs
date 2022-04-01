@@ -81,11 +81,6 @@ jobs:
         with:
           submodules: true
 
-      - name: Checkout tools repo
-        uses: actions/checkout@v3
-        with:
-          repository: tamatebako/macos-cross-compile
-          path: tools
 # https://github.com/actions/virtual-environments/blob/main/images/linux/Ubuntu2004-README.md
 # https://github.com/actions/virtual-environments/blob/main/images/linux/Ubuntu1804-README.md
 # Already installed: bison flex pkg-config
