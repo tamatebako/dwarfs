@@ -116,7 +116,7 @@ jobs:
           cd build
           make -j4
 
-      - name: Check aechitecture
+      - name: Check architecture
         if: ${{ matrix.setup.scope == 'ALL' }}
         run: file build/mkdwarfs | grep 'arm64'
 
