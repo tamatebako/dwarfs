@@ -98,8 +98,8 @@ jobs:
       - name: Patch system includes
         if: ${{ matrix.env.CC == 'clang' }}
         run: |
-          ci-scripts/patch-system-includes.sh
-          patch folly/CMake/FollyConfigChecks.cmake ci-scripts/patches/FollyConfigChecks.cmake.patch -f          
+          tools/ci-scripts/patch-system-includes.sh
+          patch folly/CMake/FollyConfigChecks.cmake tools/ci-scripts/patches/FollyConfigChecks.cmake.patch -f          
 
       - name: Build libjemalloc
         run: |

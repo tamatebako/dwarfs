@@ -213,7 +213,7 @@ add_subdirectory(folly EXCLUDE_FROM_ALL)
 set(FOLLY_FILE_TO_PATCH "${CMAKE_CURRENT_SOURCE_DIR}/folly/folly/experimental/symbolizer/Elf.cpp")
 execute_process(
   COMMAND "${GNU_BASH}"
-          "${CMAKE_CURRENT_SOURCE_DIR}/ci-scripts/patch-folly.sh"
+          "${CMAKE_CURRENT_SOURCE_DIR}/tools/ci-scripts/patch-folly.sh"
           "${FOLLY_FILE_TO_PATCH}"
   RESULT_VARIABLE PATCH_FOLLY_RES
   OUTPUT_VARIABLE PATCH_FOLLY_TXT
