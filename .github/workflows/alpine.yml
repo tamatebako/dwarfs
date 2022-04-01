@@ -91,9 +91,15 @@ jobs:
           apk --no-cache --upgrade add clang-dev
 
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           submodules: true
+
+      - name: Checkout tools repo
+        uses: actions/checkout@v3
+        with:
+          repository: tamatebako/macos-cross-compile
+          path: tools
 
       - name: Patch system includes
         if: ${{ matrix.env.CC == 'clang' }}
