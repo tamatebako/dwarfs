@@ -77,22 +77,18 @@ jobs:
 
     steps:
       - name: Install packages
-        if: ${{ matrix.env.CC == 'clang' }}
         run: |
-          apk --no-cache --upgrade add clang-dev
-
-      - name: Install packages
-        if: ${{ matrix.env.CC == 'gcc' }}
-        run: |
-          apk --no-cache --upgrade add build-base
-
-      - name: Install packages
-        run: |
-          apk --no-cache --upgrade add cmake git bash fuse3-dev    \
+          apk --no-cache --upgrade add cmake git bash build-base   \
             autoconf boost-static boost-dev fmt-dev flex-dev bison \
             binutils-dev libarchive-dev libevent-dev acl-dev       \
             double-conversion-dev lz4-dev openssl-dev xz-dev       \
-            libunwind-dev libdwarf-dev glog-dev elfutils-dev
+            libunwind-dev libdwarf-dev glog-dev elfutils-dev       \
+            fuse3-dev
+
+      - name: Install packages
+        if: ${{ matrix.env.CC == 'clang' }}
+        run: |
+          apk --no-cache --upgrade add clang-dev
 
       - name: Checkout
         uses: actions/checkout@v2
