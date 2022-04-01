@@ -117,6 +117,11 @@ elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
   # for some reason, clang-10 and clang-11 binaries crash upon throwing exceptions
     add_compile_options(-fno-omit-frame-pointer)
   endif()
+  string(REGEX MATCH "^linux-musl.*" IS_CLANG_AND_MUSL $ENV{OSTYPE})
+  if(IS_CLANG_AND_MUSL)
+    message(STATUS "Clang and musl")
+    add_compile_definitions(__musl__)
+  endif(IS_CLANG_AND_MUSL)
 endif()
 
 add_compile_options(-fno-omit-frame-pointer)
