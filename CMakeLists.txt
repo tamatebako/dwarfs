@@ -243,6 +243,21 @@ endif(PATCH_FOLLY_RES EQUAL 0)
 
 add_subdirectory(folly EXCLUDE_FROM_ALL)
 
+set(FOLLY_FILE_TO_PATCH "${CMAKE_CURRENT_SOURCE_DIR}/folly/folly/experimental/symbolizer/Elf.cpp")
+execute_process(
+  COMMAND "${GNU_BASH}"
+          "${CMAKE_CURRENT_SOURCE_DIR}/ci-scripts/patch-folly.sh"
+          "${FOLLY_FILE_TO_PATCH}"
+  RESULT_VARIABLE PATCH_FOLLY_RES
+  OUTPUT_VARIABLE PATCH_FOLLY_TXT
+)
+
+if(PATCH_FOLLY_RES EQUAL 0)
+  message(STATUS "Patched '${FOLLY_FILE_TO_PATCH}'")
+else(PATCH_FOLLY_RES EQUAL 0)
+  message(FATAL "Failed to patch '${FOLLY_FILE_TO_PATCH}': ${PATH_FOLLY_TXT}")
+endif(PATCH_FOLLY_RES EQUAL 0)
+
 if(NOT (ZSTD_FOUND AND PREFER_SYSTEM_ZSTD))
   add_subdirectory(zstd/build/cmake EXCLUDE_FROM_ALL)
 endif()
