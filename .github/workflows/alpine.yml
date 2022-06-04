@@ -90,9 +90,8 @@ jobs:
         with:
           submodules: true
           
-      - run: git config --global --add safe.directory "$(pwd)"
-      
-      - run: git rev-parse --show-toplevel   
+      - name: Declare directory safe
+        run: git config --global --add safe.directory "$(pwd)"
 
       - name: Patch system includes
         if: ${{ matrix.env.CC == 'clang' }}
