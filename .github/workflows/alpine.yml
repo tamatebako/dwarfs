@@ -90,6 +90,8 @@ jobs:
         with:
           submodules: true
           
+      - run: git config --global --add safe.directory "$(pwd}"
+      
       - run: git rev-parse --show-toplevel   
 
       - name: Patch system includes
