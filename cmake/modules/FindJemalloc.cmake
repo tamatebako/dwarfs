@@ -24,7 +24,7 @@ if(Jemalloc_FOUND AND NOT (TARGET Jemalloc::Jemalloc))
 #      return 0;
 #    }"
 #    JEMALLOC_VERSION_OK)
-#  
+#
 #  if(NOT JEMALLOC_VERSION_OK)
 #    def_ext_prj_g(JEMALLOC "5.2.1")
 #    message(STATUS "Collecting jemalloc - " @${JEMALLOC_TAG}  " at " ${JEMALLOC_SOURCE_DIR})
@@ -37,13 +37,13 @@ if(Jemalloc_FOUND AND NOT (TARGET Jemalloc::Jemalloc))
 #      CMAKE_ARGS ${CMAKE_ARGUMENTS}
 #      SOURCE_DIR ${JEMALLOC_SOURCE_DIR}
 #      BINARY_DIR ${JEMALLOC_BINARY_DIR}
-#    )    
+#    )
 #
 #  endif()
   add_library(Jemalloc::Jemalloc UNKNOWN IMPORTED)
   set_target_properties(
     Jemalloc::Jemalloc
     PROPERTIES IMPORTED_LOCATION ${Jemalloc_LIBRARIES}
-               INTERFACE_INCLUDE_DIRECTORIES ${Jemalloc_INCLUDE_DIRS})         
+               INTERFACE_INCLUDE_DIRECTORIES ${Jemalloc_INCLUDE_DIRS})
 
 endif()
