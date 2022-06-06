@@ -90,6 +90,9 @@ jobs:
         with:
           submodules: true
 
+      - name: Declare directory safe
+        run: git config --global --add safe.directory "$(pwd)"
+
       - name: Patch system includes
         if: ${{ matrix.env.CC == 'clang' }}
         run: tools/ci-scripts/patch-system-includes.sh

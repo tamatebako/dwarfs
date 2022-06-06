@@ -18,7 +18,7 @@
 cmake_minimum_required(VERSION 3.20.0)
 
 cmake_policy(SET CMP0048 NEW)
-project(tebako-dwarfs VERSION 0.1.8)
+project(tebako-dwarfs VERSION 0.1.9)
 
 include(ExternalProject)
 include(FetchContent)
@@ -59,6 +59,9 @@ set(DEPS_INCLUDE_DIR ${DEPS}/include)
 set(DEPS_LIB_DIR ${DEPS}/lib)
 set(DEPS_BIN_DIR ${DEPS}/bin)
 set(DEPS_SBIN_DIR ${DEPS}/sbin)
+
+include_directories(${DEPS_INCLUDE_DIR})
+link_directories(${DEPS_LIB_DIR})
 
 # -------------------------------------------------------------------------------------------------------------------------------
 # Build scopes
