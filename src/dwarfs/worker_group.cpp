@@ -19,6 +19,10 @@
  * along with dwarfs.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <folly/portability/SysResource.h>
+#include <folly/portability/SysTime.h>
+#include <folly/portability/Unistd.h>
+
 #include <atomic>
 #include <condition_variable>
 #include <cstdint>
@@ -30,10 +34,6 @@
 #include <thread>
 #include <type_traits>
 #include <vector>
-
-#include <sys/resource.h>
-#include <sys/time.h>
-#include <unistd.h>
 
 #include <pthread.h>
 
@@ -123,7 +123,9 @@ class basic_worker_group final : public worker_group::impl, private Policy {
     for (size_t i = 0; i < num_workers; ++i) {
       workers_.emplace_back([=] {
         folly::setThreadName(folly::to<std::string>(group_name, i + 1));
-        [[maybe_unused]] auto rv = ::nice(niceness);
+#ifndef _WIN32
+        [[maybe_unused]] auto rv = nice(niceness);
+#endif
         do_work();
       });
     }
@@ -230,12 +232,15 @@ class basic_worker_group final : public worker_group::impl, private Policy {
         t += info.system_time.seconds + info.system_time.microseconds * 1e-6;
       }
 #else
+#ifndef _WIN32
+// TODO
       ::clockid_t cid;
       struct ::timespec ts;
       if (::pthread_getcpuclockid(std_to_pthread_id(w.get_id()), &cid) == 0 &&
           ::clock_gettime(cid, &ts) == 0) {
         t += ts.tv_sec + 1e-9 * ts.tv_nsec;
       }
+#endif
 #endif
     }
     return t;

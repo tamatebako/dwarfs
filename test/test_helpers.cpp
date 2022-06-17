@@ -19,14 +19,20 @@
  * along with dwarfs.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#ifndef _WIN32
+#include <sys/stat.h>
+#include <unistd.h>
+#else
+#include <folly/portability/SysStat.h>
+#include <folly/portability/Unistd.h>
+#endif
+
+
 #include <cassert>
 #include <cstdlib>
 #include <cstring>
 #include <functional>
 #include <iostream>
-
-#include <sys/stat.h>
-#include <unistd.h>
 
 #include <folly/String.h>
 
@@ -153,7 +159,9 @@ std::shared_ptr<os_access_mock> os_access_mock::create_test_instance() {
   static const std::vector<std::pair<std::string, simplestat>> statmap{
       {"", {1, S_IFDIR | 0777, 1, 1000, 100, 0, 0, 1, 2, 3}},
       {"test.pl", {3, S_IFREG | 0644, 2, 1000, 100, 0, 0, 1001, 1002, 1003}},
+#ifndef _WIN32
       {"somelink", {4, S_IFLNK | 0777, 1, 1000, 100, 16, 0, 2001, 2002, 2003}},
+#endif
       {"somedir", {5, S_IFDIR | 0777, 1, 1000, 100, 0, 0, 3001, 3002, 3003}},
       {"foo.pl", {6, S_IFREG | 0600, 2, 1337, 0, 23456, 0, 4001, 4002, 4003}},
       {"bar.pl", {6, S_IFREG | 0600, 2, 1337, 0, 23456, 0, 4001, 4002, 4003}},
@@ -162,8 +170,10 @@ std::shared_ptr<os_access_mock> os_access_mock::create_test_instance() {
        {7, S_IFREG | 0644, 1, 1000, 100, 2000000, 0, 5001, 5002, 5003}},
       {"somedir/ipsum.py",
        {9, S_IFREG | 0644, 1, 1000, 100, 10000, 0, 6001, 6002, 6003}},
+#ifndef _WIN32
       {"somedir/bad",
        {10, S_IFLNK | 0777, 1, 1000, 100, 6, 0, 7001, 7002, 7003}},
+#endif
       {"somedir/pipe",
        {12, S_IFIFO | 0644, 1, 1000, 100, 0, 0, 8001, 8002, 8003}},
       {"somedir/null", {13, S_IFCHR | 0666, 1, 0, 0, 0, 259, 9001, 9002, 9003}},
@@ -198,8 +208,10 @@ std::shared_ptr<os_access_mock> os_access_mock::create_test_instance() {
 
     if (S_ISREG(st.st_mode)) {
       m->add(kv.first, st, [size = st.st_size] { return loremipsum(size); });
+#ifndef _WIN32
     } else if (S_ISLNK(st.st_mode)) {
       m->add(kv.first, st, linkmap.at(kv.first));
+#endif
     } else {
       m->add(kv.first, st);
     }
@@ -340,10 +352,11 @@ void os_access_mock::lstat(const std::string& path, struct ::stat* st) const {
 
 std::string
 os_access_mock::readlink(const std::string& path, size_t size) const {
+#ifndef _WIN32
   if (auto de = find(path); de && S_ISLNK(de->stat.st_mode)) {
     return std::get<std::string>(de->v);
   }
-
+#endif
   throw std::runtime_error("oops");
 }
 

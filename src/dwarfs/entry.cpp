@@ -73,16 +73,20 @@ std::string entry::type_string() const {
     return "file";
   } else if (S_ISDIR(mode)) {
     return "directory";
+#ifndef _WIN32
   } else if (S_ISLNK(mode)) {
     return "link";
+#endif
   } else if (S_ISCHR(mode)) {
     return "chardev";
   } else if (S_ISBLK(mode)) {
     return "blockdev";
   } else if (S_ISFIFO(mode)) {
     return "fifo";
+#ifndef _WIN32
   } else if (S_ISSOCK(mode)) {
     return "socket";
+#endif
   }
 
   DWARFS_THROW(runtime_error, fmt::format("unknown file type: {:#06x}", mode));
@@ -348,10 +352,15 @@ class entry_factory_ : public entry_factory {
       return std::make_shared<file>(name, std::move(parent), st);
     } else if (S_ISDIR(mode)) {
       return std::make_shared<dir>(name, std::move(parent), st);
+#ifndef _WIN32
     } else if (S_ISLNK(mode)) {
       return std::make_shared<link>(name, std::move(parent), st);
-    } else if (S_ISCHR(mode) || S_ISBLK(mode) || S_ISFIFO(mode) ||
-               S_ISSOCK(mode)) {
+#endif
+    } else if (S_ISCHR(mode) || S_ISBLK(mode) || S_ISFIFO(mode)
+#ifndef _WIN32
+		|| S_ISSOCK(mode)
+#endif
+	      ) {
       return std::make_shared<device>(name, std::move(parent), st);
     } else {
       // TODO: warn

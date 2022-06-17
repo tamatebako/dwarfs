@@ -19,13 +19,13 @@
  * along with dwarfs.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <folly/portability/Unistd.h>
+
 #include <array>
 #include <condition_variable>
 #include <memory>
 #include <mutex>
 #include <thread>
-
-#include <unistd.h>
 
 #include <archive.h>
 #include <archive_entry.h>
@@ -280,6 +280,7 @@ void filesystem_extractor_<LoggerPolicy>::extract(filesystem_v2 const& fs,
     ::archive_entry_set_pathname(ae, entry.path().c_str());
     ::archive_entry_copy_stat(ae, &stbuf);
 
+#ifndef _WIN32
     if (S_ISLNK(inode.mode())) {
       std::string link;
       if (fs.readlink(inode, &link) != 0) {
@@ -287,6 +288,7 @@ void filesystem_extractor_<LoggerPolicy>::extract(filesystem_v2 const& fs,
       }
       ::archive_entry_set_symlink(ae, link.c_str());
     }
+#endif
 
     ::archive_entry_linkify(lr, &ae, &spare);
 

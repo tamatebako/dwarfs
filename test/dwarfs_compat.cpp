@@ -31,7 +31,9 @@
 #include <tuple>
 #include <vector>
 
+#ifndef _WIN32
 #include <sys/statvfs.h>
+#endif
 
 #include <folly/FileUtil.h>
 #include <folly/String.h>
@@ -920,11 +922,15 @@ void check_compat(logger& lgr, filesystem_v2 const& fs,
       {"foo/1/2/3/x", make_stat(S_IFREG | 0644, 1517)},
       {"foo/1/2/xxx.sh", make_stat(S_IFREG | 0755, 94)},
       {"foo/1/fmt.sh", make_stat(S_IFREG | 0755, 94)},
+#ifndef _WIN32
       {"foo/bad", make_stat(S_IFLNK | 0777, 6)},
+#endif
       {"foo/bar", make_stat(S_IFREG | 0644, 0)},
       {"foo/bla.sh", make_stat(S_IFREG | 0644, 1517)},
       {"foo/pipe", make_stat(S_IFIFO | 0644, 0)},
+#ifndef _WIN32
       {"foobar", make_stat(S_IFLNK | 0777, 7)},
+#endif
       {"format.sh", make_stat(S_IFREG | 0755, 94)},
       {"perl-exec.sh", make_stat(S_IFREG | 0644, 87)},
       {"test.py", make_stat(S_IFREG | 0644, 1012)},

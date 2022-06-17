@@ -19,6 +19,15 @@
  * along with dwarfs.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <folly/portability/Fcntl.h>
+#ifndef _WIN32
+#include <sys/statvfs.h>
+#else
+#include <pro-statvfs.h>
+#endif
+#include <folly/portability/Time.h>
+#include <folly/portability/Unistd.h>
+
 #include <algorithm>
 #include <cassert>
 #include <cerrno>
@@ -27,12 +36,6 @@
 #include <ctime>
 #include <numeric>
 #include <ostream>
-
-#include <fcntl.h>
-#include <sys/stat.h>
-#include <sys/statvfs.h>
-#include <time.h>
-#include <unistd.h>
 
 #include <boost/algorithm/string.hpp>
 
@@ -465,14 +468,18 @@ class metadata_ final : public metadata_v2::impl {
     switch (mode & S_IFMT) {
     case S_IFDIR:
       return inode_rank::INO_DIR;
+#ifndef _WIN32
     case S_IFLNK:
       return inode_rank::INO_LNK;
+#endif
     case S_IFREG:
       return inode_rank::INO_REG;
     case S_IFBLK:
     case S_IFCHR:
       return inode_rank::INO_DEV;
+#ifndef _WIN32
     case S_IFSOCK:
+#endif
     case S_IFIFO:
       return inode_rank::INO_OTH;
     default:
@@ -485,16 +492,20 @@ class metadata_ final : public metadata_v2::impl {
     switch ((mode)&S_IFMT) {
     case S_IFDIR:
       return 'd';
+#ifndef _WIN32
     case S_IFLNK:
       return 'l';
+#endif
     case S_IFREG:
       return '-';
     case S_IFBLK:
       return 'b';
     case S_IFCHR:
       return 'c';
+#ifndef _WIN32
     case S_IFSOCK:
       return 's';
+#endif
     case S_IFIFO:
       return 'p';
     default:
@@ -599,8 +610,10 @@ class metadata_ final : public metadata_v2::impl {
   size_t file_size(inode_view iv, uint16_t mode) const {
     if (S_ISREG(mode)) {
       return reg_file_size(iv);
+#ifndef _WIN32
     } else if (S_ISLNK(mode)) {
       return link_value(iv).size();
+#endif
     } else {
       return 0;
     }
@@ -769,16 +782,20 @@ void metadata_<LoggerPolicy>::dump(
   } else if (S_ISDIR(mode)) {
     dump(os, indent + "  ", make_directory_view(iv), entry, detail_level,
          std::move(icb));
+#ifndef _WIN32
   } else if (S_ISLNK(mode)) {
     os << " -> " << link_value(iv) << "\n";
+#endif
   } else if (S_ISBLK(mode)) {
     os << " (block device: " << get_device_id(inode) << ")\n";
   } else if (S_ISCHR(mode)) {
     os << " (char device: " << get_device_id(inode) << ")\n";
   } else if (S_ISFIFO(mode)) {
     os << " (named pipe)\n";
+#ifndef _WIN32
   } else if (S_ISSOCK(mode)) {
     os << " (socket)\n";
+#endif
   }
 }
 
@@ -948,9 +965,11 @@ folly::dynamic metadata_<LoggerPolicy>::as_dynamic(dir_entry_view entry) const {
   } else if (S_ISDIR(mode)) {
     obj["type"] = "directory";
     obj["inodes"] = as_dynamic(make_directory_view(iv), entry);
+#ifndef _WIN32
   } else if (S_ISLNK(mode)) {
     obj["type"] = "link";
     obj["target"] = std::string(link_value(iv));
+#endif
   } else if (S_ISBLK(mode)) {
     obj["type"] = "blockdev";
     obj["device_id"] = get_device_id(inode);
@@ -959,8 +978,10 @@ folly::dynamic metadata_<LoggerPolicy>::as_dynamic(dir_entry_view entry) const {
     obj["device_id"] = get_device_id(inode);
   } else if (S_ISFIFO(mode)) {
     obj["type"] = "fifo";
+#ifndef _WIN32
   } else if (S_ISSOCK(mode)) {
     obj["type"] = "socket";
+#endif
   }
 
   return obj;
@@ -1028,9 +1049,11 @@ template <typename LoggerPolicy>
 std::string metadata_<LoggerPolicy>::modestring(uint16_t mode) const {
   std::ostringstream oss;
 
+#ifndef _WIN32
   oss << (mode & S_ISUID ? 'U' : '-');
   oss << (mode & S_ISGID ? 'G' : '-');
   oss << (mode & S_ISVTX ? 'S' : '-');
+#endif
   oss << get_filetype_label(mode);
   oss << (mode & S_IRUSR ? 'r' : '-');
   oss << (mode & S_IWUSR ? 'w' : '-');
@@ -1240,7 +1263,9 @@ int metadata_<LoggerPolicy>::getattr(inode_view iv,
   stbuf->st_size = S_ISDIR(mode) ? make_directory_view(iv).entry_count()
                                  : file_size(iv, mode);
   stbuf->st_ino = inode + inode_offset_;
+#ifndef _WIN32
   stbuf->st_blocks = (stbuf->st_size + 511) / 512;
+#endif
   stbuf->st_uid = iv.getuid();
   stbuf->st_gid = iv.getgid();
   stbuf->st_mtime = resolution * (timebase + iv.mtime_offset());
@@ -1343,21 +1368,23 @@ int metadata_<LoggerPolicy>::open(inode_view iv) const {
 
 template <typename LoggerPolicy>
 int metadata_<LoggerPolicy>::readlink(inode_view iv, std::string* buf) const {
+#ifndef _WIN32
   if (S_ISLNK(iv.mode())) {
     buf->assign(link_value(iv));
     return 0;
   }
-
+#endif
   return -EINVAL;
 }
 
 template <typename LoggerPolicy>
 folly::Expected<std::string, int>
 metadata_<LoggerPolicy>::readlink(inode_view iv) const {
+#ifndef _WIN32
   if (S_ISLNK(iv.mode())) {
     return link_value(iv);
   }
-
+#endif
   return folly::makeUnexpected(-EINVAL);
 }
 
@@ -1374,7 +1401,17 @@ int metadata_<LoggerPolicy>::statvfs(struct ::statvfs* stbuf) const {
     }
   }
   stbuf->f_files = inode_count_;
+/* TODO:
+The following flags for the f_flag member shall be defined:
+
+ST_RDONLY
+Read-only file system.
+ST_NOSUID
+Does not support the semantics of the ST_ISUID and ST_ISGID file mode bits.
+*/
+#ifndef _WIN32
   stbuf->f_flag = ST_RDONLY;
+#endif
   stbuf->f_namemax = PATH_MAX;
 
   return 0;

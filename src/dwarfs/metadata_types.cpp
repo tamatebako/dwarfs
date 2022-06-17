@@ -90,8 +90,10 @@ int mode_rank(uint16_t mode) {
   switch (mode & S_IFMT) {
   case S_IFDIR:
     return 0;
+#ifndef _WIN32
   case S_IFLNK:
     return 1;
+#endif
   case S_IFREG:
     return 2;
   case S_IFBLK:

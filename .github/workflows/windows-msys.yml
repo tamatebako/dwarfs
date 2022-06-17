@@ -27,7 +27,9 @@
 # in specific environment. Due to this reason there is no caching. It is done by
 # intention. All caching is in upstream projects.
 #
-name: MacOS-arm64
+# Also this file contains comments that will be useful is dwarfs has to be build
+# in different environment, not GHA.
+name: Windows-MSys
 
 on:
   push:
@@ -36,20 +38,18 @@ on:
       - '**.adoc'
       - '**.md'
       - '.github/workflows/*.yml'
-      - '!.github/workflows/macos-arm64.yml'
+      - '!.github/workflows/windows-msys.yml'
   pull_request:
     paths-ignore:
       - 'docs/**'
       - '**.adoc'
       - '**.md'
       - '.github/workflows/*.yml'
-      - '!.github/workflows/macos-arm64.yml'
+      - '!.github/workflows/windows-msys.yml'
   workflow_dispatch:
 
 env:
-  MAKEFLAGS: -j4
-  CC: clang
-  CXX: clang++
+  BUILD_TYPE: Release
 
 jobs:
  # https://wildwolf.name/github-actions-how-to-avoid-running-the-same-workflow-multiple-times/
@@ -76,79 +76,74 @@ jobs:
           fi
           echo "::set-output name=foreign_pr::${fpr}"
           echo "::set-output name=head_tag::${tag}"
+
   build:
-    name: "macos-${{ matrix.setup.version }} [target:${{ matrix.setup.target }}, scope:${{ matrix.setup.scope }}]"
+    name: windows-msys [${{ matrix.env.CC }}, ${{ matrix.setup.scope }}]
     needs: prepare
-    runs-on: macos-${{ matrix.setup.version }}
+    runs-on: windows-latest
     strategy:
       fail-fast: false
       matrix:
+#  We are running two configurations:
+#   - ALL in order to run regression tests
+#   - MKD just to be sure that configuration needed for teabako builds without issues
         setup:
-          - version: '11.0'
-            xcode: '12.4'
-            target: arm64
-            scope: LIB
+          - scope: 'ALL'
             tests: 'OFF'
-          - version: '11.0'
-            xcode: '12.4'
-            target: arm64
-            scope: ALL
+          - scope: 'MKD'
             tests: 'OFF'
+        sys:
+          - mingw64
+#          - ucrt64
+#          - clang64
+        env:
+          - CC: gcc
+            CXX: g++
+#          - CC: clang
+#            CXX: clang++
+    env: ${{ matrix.env }}
+
+    defaults:
+      run:
+        shell: msys2 {0}
 
     steps:
-      - name: Select XCode
-        uses: maxim-lobanov/setup-xcode@v1
+      - name: Setup MSys
+        uses: msys2/setup-msys2@v2
         with:
-          xcode-version: ${{ matrix.setup.xcode }}
+          msystem: ${{matrix.sys}}
+          path-type: strict
+          update: true
+          install: >-
+            git
+            tar
+            bison
+            flex
+          pacboy: >-
+            toolchain:p
+            openssl:p
+            cmake:p
+            boost:p
+            make:p
+            diffutils:p
+            libevent:p
+            double-conversion:p
+            glog:p
+            fmt:p
+            dlfcn:p
 
       - name: Checkout
         uses: actions/checkout@v3
         with:
           submodules: true
 
-      - name: Set environment variables
-        run: |
-          echo 'LEVEL_UP<<EOF' >> $GITHUB_ENV
-          tools/ci-scripts/level-up.sh "${{ github.workspace }}/.." >> $GITHUB_ENV
-          echo 'EOF' >> $GITHUB_ENV
-          echo 'BREW_HOME<<EOF' >> $GITHUB_ENV
-          brew --prefix >> $GITHUB_ENV
-          echo 'EOF' >> $GITHUB_ENV
-
-      - name: Install packages for build host architecture
-        run: |
-          brew install bison flex gnu-sed bash glog gflags icu4c boost
-
-      - name: Install packages for target host architecture
-        run: |
-          ${{ env.BREW_HOME }}/bin/bash tools/ci-scripts/arm-brew-setup.sh ${{ env.LEVEL_UP }}
-          ${{ env.BREW_HOME }}/bin/bash tools/ci-scripts/arm-brew-install.sh ${{ env.LEVEL_UP }} libb2 lz4 \
-                                xz zstd zlib libarchive icu4c boost fmt openssl@1.1 libevent libsodium     \
-                                double-conversion gflags glog jemalloc
-
       - name: Configure
         run: |
           mkdir build
           cd build
-          cmake .. -DTARGET_HOMEBREW=${{ github.workspace }}/../arm-homebrew                               \
-                   -DWITH_TESTS=${{ matrix.setup.tests }}                                                  \
-                   -DTEBAKO_BUILD_SCOPE=${{ matrix.setup.scope }}                                          \
-                   -DTEBAKO_BUILD_TARGET=${{ matrix.setup.target }}-apple-macos${{ matrix.setup.version }} \
-                   -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/install
+          cmake .. -DWITH_TESTS=${{ matrix.setup.tests }} -DTEBAKO_BUILD_SCOPE=${{ matrix.setup.scope }} -DCMAKE_INSTALL_PREFIX=install
 
       - name: Build
         run: |
           cd build
-          make -j4
-
-      - name: Check architecture
-        if: ${{ matrix.setup.scope == 'ALL' }}
-        run: file build/mkdwarfs | grep 'arm64'
-
-      - name: Upload test app
-        if: ${{ matrix.setup.scope == 'ALL' }}
-        uses: actions/upload-artifact@v2
-        with:
-          name: arm64-mkdwarfs
-          path: ${{github.workspace}}/build/mkdwarfs
-          retention-days: 1
+          ninja -j4
