@@ -107,7 +107,13 @@ class basic_worker_group final : public worker_group::impl, private Policy {
  public:
   template <typename... Args>
   basic_worker_group(const char* group_name, size_t num_workers,
-                     size_t max_queue_len, int niceness, Args&&... args)
+                     size_t max_queue_len,
+#ifndef _WIN32
+                     int niceness,
+#else
+                     int nPriority,
+#endif
+                     Args&&... args)
       : Policy(std::forward<Args>(args)...)
       , running_(true)
       , pending_(0)
@@ -125,6 +131,8 @@ class basic_worker_group final : public worker_group::impl, private Policy {
         folly::setThreadName(folly::to<std::string>(group_name, i + 1));
 #ifndef _WIN32
         [[maybe_unused]] auto rv = nice(niceness);
+#else
+        [[maybe_unused]] auto rv = SetThreadPriority(GetCurrentThread(), nPriority);
 #endif
         do_work();
       });
@@ -231,16 +239,24 @@ class basic_worker_group final : public worker_group::impl, private Policy {
         t += info.user_time.seconds + info.user_time.microseconds * 1e-6;
         t += info.system_time.seconds + info.system_time.microseconds * 1e-6;
       }
+#elif defined(_WIN32)
+      FILETIME CreationTime, ExitTime, KernelTime, UserTime;
+// pthread_gethandle is MINGW private extension
+// MSVC provides pthread_getw32threadid_np [it is just a note in case anyone decides to support MSVC ]
+      HANDLE hThread = pthread_gethandle(std_to_pthread_id(w.get_id()));
+      BOOL r = GetThreadTimes(hThread, &CreationTime, &ExitTime, &KernelTime, &UserTime);
+      if (r) {
+        t = UserTime.dwLowDateTime * 1e-7 + KernelTime.dwLowDateTime * 1e-7;
+      }
+// We do nothing on error, just leave time equal to 0
+// Also note that GetThreadTimes is not really reliable
 #else
-#ifndef _WIN32
-// TODO
       ::clockid_t cid;
       struct ::timespec ts;
       if (::pthread_getcpuclockid(std_to_pthread_id(w.get_id()), &cid) == 0 &&
           ::clock_gettime(cid, &ts) == 0) {
         t += ts.tv_sec + 1e-9 * ts.tv_nsec;
       }
-#endif
 #endif
     }
     return t;

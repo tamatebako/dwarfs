@@ -73,10 +73,8 @@ std::string entry::type_string() const {
     return "file";
   } else if (S_ISDIR(mode)) {
     return "directory";
-#ifndef _WIN32
   } else if (S_ISLNK(mode)) {
     return "link";
-#endif
   } else if (S_ISCHR(mode)) {
     return "chardev";
   } else if (S_ISBLK(mode)) {
@@ -352,10 +350,8 @@ class entry_factory_ : public entry_factory {
       return std::make_shared<file>(name, std::move(parent), st);
     } else if (S_ISDIR(mode)) {
       return std::make_shared<dir>(name, std::move(parent), st);
-#ifndef _WIN32
     } else if (S_ISLNK(mode)) {
       return std::make_shared<link>(name, std::move(parent), st);
-#endif
     } else if (S_ISCHR(mode) || S_ISBLK(mode) || S_ISFIFO(mode)
 #ifndef _WIN32
 		|| S_ISSOCK(mode)

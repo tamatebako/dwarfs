@@ -33,6 +33,9 @@
 
 #ifndef _WIN32
 #include <sys/statvfs.h>
+#else
+#include <pro-statvfs.h>
+#include <folly/portability/SysStat.h>
 #endif
 
 #include <folly/FileUtil.h>
@@ -807,7 +810,7 @@ struct ::stat make_stat(::mode_t mode, ::off_t size) {
   return st;
 }
 
-void check_compat(logger& lgr, filesystem_v2 const& fs,
+[[maybe_unused]] void check_compat(logger& lgr, filesystem_v2 const& fs,
                   std::string const& version) {
   bool has_devices = not(version == "0.2.0" or version == "0.2.3");
   bool has_ac_time = version == "0.2.0" or version == "0.2.3";
@@ -819,7 +822,11 @@ void check_compat(logger& lgr, filesystem_v2 const& fs,
   EXPECT_EQ(1, vfsbuf.f_frsize);
   EXPECT_EQ(10614, vfsbuf.f_blocks);
   EXPECT_EQ(33 + 3 * has_devices, vfsbuf.f_files);
+#ifdef _WIN32
+  EXPECT_EQ(ST_RDONLY|ST_NOSUID, vfsbuf.f_flag);
+#else
   EXPECT_EQ(ST_RDONLY, vfsbuf.f_flag);
+#endif
   EXPECT_GT(vfsbuf.f_namemax, 0);
 
   auto json = fs.serialize_metadata_as_json(true);
@@ -922,15 +929,11 @@ void check_compat(logger& lgr, filesystem_v2 const& fs,
       {"foo/1/2/3/x", make_stat(S_IFREG | 0644, 1517)},
       {"foo/1/2/xxx.sh", make_stat(S_IFREG | 0755, 94)},
       {"foo/1/fmt.sh", make_stat(S_IFREG | 0755, 94)},
-#ifndef _WIN32
       {"foo/bad", make_stat(S_IFLNK | 0777, 6)},
-#endif
       {"foo/bar", make_stat(S_IFREG | 0644, 0)},
       {"foo/bla.sh", make_stat(S_IFREG | 0644, 1517)},
       {"foo/pipe", make_stat(S_IFIFO | 0644, 0)},
-#ifndef _WIN32
       {"foobar", make_stat(S_IFLNK | 0777, 7)},
-#endif
       {"format.sh", make_stat(S_IFREG | 0755, 94)},
       {"perl-exec.sh", make_stat(S_IFREG | 0644, 87)},
       {"test.py", make_stat(S_IFREG | 0644, 1012)},
@@ -1051,6 +1054,7 @@ TEST_P(compat_metadata, backwards_compat) {
 INSTANTIATE_TEST_SUITE_P(dwarfs, compat_metadata,
                          ::testing::ValuesIn(versions));
 
+#ifndef _WIN32
 class compat_filesystem
     : public testing::TestWithParam<std::tuple<std::string, bool>> {};
 
@@ -1093,6 +1097,7 @@ TEST_P(compat_filesystem, backwards_compat) {
 INSTANTIATE_TEST_SUITE_P(dwarfs, compat_filesystem,
                          ::testing::Combine(::testing::ValuesIn(versions),
                                             ::testing::Bool()));
+#endif
 
 class rewrite
     : public testing::TestWithParam<std::tuple<std::string, bool, bool>> {};

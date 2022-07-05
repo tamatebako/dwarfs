@@ -116,11 +116,13 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
       CACHE STRING "Build Type" FORCE)
 endif()
 
+add_compile_options(-O0 -g)
+
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
   add_compile_options(-fdiagnostics-color=always)
   # For gcc, -O3 is *much* worse than -O2
-  set(CMAKE_C_FLAGS_RELEASE "-DNDEBUG -O2 -g")
-  set(CMAKE_CXX_FLAGS_RELEASE "-DNDEBUG -O2 -g")
+#  set(CMAKE_C_FLAGS_RELEASE "-DNDEBUG -O2 -g")
+#  set(CMAKE_CXX_FLAGS_RELEASE "-DNDEBUG -O2 -g")
 elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
   add_compile_options(-fcolor-diagnostics)
   if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "12.0.0")
@@ -130,7 +132,7 @@ elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
 endif()
 
 execute_process(
-  COMMAND "${GNU_BASH}" 
+  COMMAND "${GNU_BASH}"
           "-c"
           "echo \$OSTYPE"
   RESULT_VARIABLE OSTYPE_RES
@@ -152,7 +154,7 @@ if("${OSTYPE_TXT}" MATCHES "^linux-musl.*")
   set(PATCH_FOLLY ON)
 elseif("${OSTYPE_TXT}" MATCHES "^msys*")
   message(STATUS "Adding msys compile options")
-  add_compile_definitions(USE_JEMALLOC)
+  add_compile_definitions(FOLLY_ASSUME_NO_JEMALLOC)
   add_compile_options(-Wno-address)
   include_directories(${CMAKE_SOURCE_DIR}/tools/include)
   set(PATCH_FOLLY ON)
@@ -257,13 +259,13 @@ if (${PATCH_FOLLY})
     RESULT_VARIABLE PATCH_FOLLY_RES
     OUTPUT_VARIABLE PATCH_FOLLY_TXT
   )
-    
+
   if(PATCH_FOLLY_RES EQUAL 0)
     message(STATUS "Patched folly at '${FOLLY_ROOT}'")
   else(PATCH_FOLLY_RES EQUAL 0)
     message(FATAL_ERROR "Failed to patch folly at '${FOLLY_ROOT}': ${PATH_FOLLY_TXT}")
   endif(PATCH_FOLLY_RES EQUAL 0)
-endif(${PATCH_FOLLY})  
+endif(${PATCH_FOLLY})
 
 add_subdirectory(folly EXCLUDE_FROM_ALL)
 
@@ -414,7 +416,7 @@ endif()
 if(WITH_TESTS OR WITH_BENCHMARKS)
   add_library(test_helpers test/test_helpers.cpp test/test_strings.cpp
                            test/loremipsum.cpp)
-  target_link_libraries(test_helpers dwarfs folly)
+  list(APPEND BINARY_TARGETS test_helpers)
 endif()
 
 if(WITH_TESTS)
@@ -725,12 +727,12 @@ endif()
 
 foreach(tgt ${BINARY_TARGETS})
   target_link_libraries(${tgt} dwarfs)
-  if(USE_JEMALLOC)
-    target_link_libraries(${tgt} ${Jemalloc_LIBRARIES})
-  endif(USE_JEMALLOC)
-  if (IS_MSYS)
-    target_link_libraries(${tgt} wsock32 ws2_32)
-  endif(IS_MSYS)
+#  if(USE_JEMALLOC)
+#    target_link_libraries(${tgt} ${Jemalloc_LIBRARIES})
+#  endif(USE_JEMALLOC)
+#  if (IS_MSYS)
+#    target_link_libraries(${tgt} wsock32 ws2_32)
+#  endif(IS_MSYS)
 endforeach()
 
 if(STATIC_BUILD_DO_NOT_USE)
@@ -896,7 +898,7 @@ if(FALSE)
   endif()
 endif()
 
-if(NOT $PRJ_VERSION_FULL} STREQUAL "")
+if(NOT ${PRJ_VERSION_FULL} STREQUAL "")
   set(CPACK_GENERATOR "TGZ")
   set(CPACK_SOURCE_GENERATOR "${CPACK_GENERATOR}")
   set(CPACK_PACKAGE_VERSION_MAJOR "${PRJ_VERSION_MAJOR}")

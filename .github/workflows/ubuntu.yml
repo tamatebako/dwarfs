@@ -33,6 +33,7 @@ name: Ubuntu
 
 on:
   push:
+    branches: [ main ]
     paths-ignore:
       - 'docs/**'
       - '**.adoc'

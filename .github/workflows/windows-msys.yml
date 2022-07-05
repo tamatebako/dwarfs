@@ -33,6 +33,7 @@ name: Windows-MSys
 
 on:
   push:
+    branches: [ main ]
     paths-ignore:
       - 'docs/**'
       - '**.adoc'
@@ -89,15 +90,12 @@ jobs:
 #   - MKD just to be sure that configuration needed for teabako builds without issues
         setup:
           - scope: 'ALL'
-            tests: 'OFF'
+            tests: 'ON'
           - scope: 'MKD'
             tests: 'OFF'
-        sys:
-          - mingw64
-#          - ucrt64
-#          - clang64
         env:
-          - CC: gcc
+          - sys: mingw64
+            CC: gcc
             CXX: g++
 #          - CC: clang
 #            CXX: clang++
@@ -111,8 +109,8 @@ jobs:
       - name: Setup MSys
         uses: msys2/setup-msys2@v2
         with:
-          msystem: ${{matrix.sys}}
-          path-type: strict
+          msystem: ${{matrix.env.sys}}
+          path-type: minimal
           update: true
           install: >-
             git
@@ -131,6 +129,7 @@ jobs:
             glog:p
             fmt:p
             dlfcn:p
+            gtest:p
 
       - name: Checkout
         uses: actions/checkout@v3
@@ -141,9 +140,15 @@ jobs:
         run: |
           mkdir build
           cd build
-          cmake .. -DWITH_TESTS=${{ matrix.setup.tests }} -DTEBAKO_BUILD_SCOPE=${{ matrix.setup.scope }} -DCMAKE_INSTALL_PREFIX=install
+          cmake .. -DWITH_TESTS=${{ matrix.setup.tests }} -DUSE_JEMALLOC=OFF -DPREFER_SYSTEM_GTEST=ON -DTEBAKO_BUILD_SCOPE=${{ matrix.setup.scope }} -DCMAKE_INSTALL_PREFIX=install
 
       - name: Build
         run: |
           cd build
-          ninja -j4
+          cmake --build .
+
+      - name: Test
+        if: ${{ matrix.setup.tests == 'ON' }}
+        run: |
+          cd build
+          ninja test
