@@ -25,7 +25,6 @@ include(FetchContent)
 include(CheckCXXSourceCompiles)
 
 include(${CMAKE_SOURCE_DIR}/cmake/version.cmake)
-<<<<<<< HEAD
 
 # THis is the default that will be overwritten for MacOS and MSys
 set(GNU_BASH "bash")
@@ -35,10 +34,6 @@ include(${CMAKE_SOURCE_DIR}/tools/cmake-scripts/msys-environment.cmake)
 include(${CMAKE_SOURCE_DIR}/tools/cmake-scripts/def-external-project.cmake)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules")
-=======
-include(${CMAKE_SOURCE_DIR}/cmake/modules/MacOsEnvironment.cmake)
-include(${CMAKE_SOURCE_DIR}/cmake/modules/DefExternalProject.cmake)
->>>>>>> main
 
 option(WITH_TESTS "build with tests" OFF)
 option(WITH_BENCHMARKS "build with benchmarks" OFF)
@@ -62,15 +57,9 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 if (NOT DEPS)
   set(DEPS "${CMAKE_CURRENT_SOURCE_DIR}/deps")
-<<<<<<< HEAD
   message(STATUS "Using local setting for DEPS folder: ${DEPS}")
 else()
   message(STATUS "Using upstream setting for DEPS folder: ${DEPS}")
-=======
-  message("Using local setting for DEPS folder: ${DEPS}")
-else()
-  message("Using upstream setting for DEPS folder: ${DEPS}")
->>>>>>> main
 endif()
 
 set(DEPS_INCLUDE_DIR ${DEPS}/include)
@@ -141,7 +130,7 @@ elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
     add_compile_options(-fno-omit-frame-pointer)
   endif()
   execute_process(
-    COMMAND "${GNU_BASH}" 
+    COMMAND "${GNU_BASH}"
             "-c"
             "echo \$OSTYPE"
     RESULT_VARIABLE OSTYPE_RES
@@ -159,7 +148,6 @@ elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
   endif()
 endif()
 
-<<<<<<< HEAD
 execute_process(
   COMMAND "${GNU_BASH}"
           "-c"
@@ -168,9 +156,6 @@ execute_process(
   OUTPUT_VARIABLE OSTYPE_TXT
   OUTPUT_STRIP_TRAILING_WHITESPACE
 )
-=======
-add_compile_options(-fno-omit-frame-pointer)
->>>>>>> main
 
 if(OSTYPE_RES EQUAL 0)
   message(STATUS "OSTYPE: '${OSTYPE_TXT}'")
@@ -282,7 +267,6 @@ set(ZSTD_INCLUDE_DIR
     ""
     CACHE PATH "don't build folly with zstd" FORCE)
 
-<<<<<<< HEAD
 if (${PATCH_FOLLY})
   set(FOLLY_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/folly")
   execute_process(
@@ -302,40 +286,6 @@ endif(${PATCH_FOLLY})
 
 add_subdirectory(folly EXCLUDE_FROM_ALL)
 
-=======
-set(FOLLY_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/folly")
-execute_process(
-  COMMAND "${GNU_BASH}"
-          "${CMAKE_CURRENT_SOURCE_DIR}/tools/ci-scripts/patch-folly.sh"
-          "${FOLLY_ROOT}"
-  RESULT_VARIABLE PATCH_FOLLY_RES
-  OUTPUT_VARIABLE PATCH_FOLLY_TXT
-)
-    
-if(PATCH_FOLLY_RES EQUAL 0)
-  message(STATUS "Patched folly at '${FOLLY_ROOT}'")
-else(PATCH_FOLLY_RES EQUAL 0)
-  message(FATAL "Failed to patch folly at '${FOLLY_ROOT}': ${PATH_FOLLY_TXT}")
-endif(PATCH_FOLLY_RES EQUAL 0)
-
-add_subdirectory(folly EXCLUDE_FROM_ALL)
-
-set(FOLLY_FILE_TO_PATCH "${CMAKE_CURRENT_SOURCE_DIR}/folly/folly/experimental/symbolizer/Elf.cpp")
-execute_process(
-  COMMAND "${GNU_BASH}"
-          "${CMAKE_CURRENT_SOURCE_DIR}/ci-scripts/patch-folly.sh"
-          "${FOLLY_FILE_TO_PATCH}"
-  RESULT_VARIABLE PATCH_FOLLY_RES
-  OUTPUT_VARIABLE PATCH_FOLLY_TXT
-)
-
-if(PATCH_FOLLY_RES EQUAL 0)
-  message(STATUS "Patched '${FOLLY_FILE_TO_PATCH}'")
-else(PATCH_FOLLY_RES EQUAL 0)
-  message(FATAL "Failed to patch '${FOLLY_FILE_TO_PATCH}': ${PATH_FOLLY_TXT}")
-endif(PATCH_FOLLY_RES EQUAL 0)
-
->>>>>>> main
 if(NOT (ZSTD_FOUND AND PREFER_SYSTEM_ZSTD))
   add_subdirectory(zstd/build/cmake EXCLUDE_FROM_ALL)
 endif()
@@ -450,11 +400,7 @@ if("${TEBAKO_BUILD_SCOPE}" STREQUAL "ALL")
   add_executable(dwarfsbench src/dwarfsbench.cpp)
   add_executable(dwarfsextract src/dwarfsextract.cpp)
 
-<<<<<<< HEAD
   list(APPEND BINARY_TARGETS dwarfsck dwarfsbench dwarfsextract)
-=======
-  list(APPEND BINARY_TARGETS mkdwarfs dwarfsck dwarfsbench dwarfsextract)
->>>>>>> main
 
   if(FUSE3_FOUND)
     add_executable(dwarfs-bin src/dwarfs.cpp)
@@ -487,11 +433,7 @@ endif()
 if(WITH_TESTS OR WITH_BENCHMARKS)
   add_library(test_helpers test/test_helpers.cpp test/test_strings.cpp
                            test/loremipsum.cpp)
-<<<<<<< HEAD
   list(APPEND BINARY_TARGETS test_helpers)
-=======
-  target_link_libraries(test_helpers dwarfs folly)
->>>>>>> main
 endif()
 
 if(WITH_TESTS)
@@ -567,11 +509,7 @@ if(RONN_EXE_FOUND)
     if(${ronn_result} EQUAL 0)
       add_custom_command(
         OUTPUT "${man_output}"
-<<<<<<< HEAD
         COMMAND ${CMAKE_COMMAND} -E make_directory "${man_dir}"
-=======
-        COMMAND mkdir -p "${man_dir}"
->>>>>>> main
         COMMAND ${RONN_EXE} <"${man_input}" >"${man_output}"
         DEPENDS "${man_input}")
       list(APPEND MAN_PAGES "${man_output}")
@@ -587,11 +525,6 @@ if(RONN_EXE_FOUND)
 else()
   message(WARNING "ronn was not found, skipping generation of manpages")
 endif()
-<<<<<<< HEAD
-=======
-
-include(${CMAKE_SOURCE_DIR}/cmake/modules/SetupFbThrift.cmake)
->>>>>>> main
 
 list(
   APPEND
@@ -648,36 +581,17 @@ list(
 
 add_custom_command(
   OUTPUT ${FROZEN_THRIFT_SRC}  ${THRIFT_LIGHT_SRC}
-<<<<<<< HEAD
   COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/thrift/lib/thrift
   COMMAND ${CMAKE_COMMAND} -E copy ${FBTHRIFT_SOURCE_DIR}/thrift/lib/thrift/frozen.thrift ${CMAKE_CURRENT_BINARY_DIR}/thrift/lib/thrift/
   COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_CURRENT_BINARY_DIR}/thrift/lib/thrift ${DEPS}/bin/thrift1 --gen mstch_cpp2 frozen.thrift
-=======
-  COMMAND mkdir -p ${CMAKE_CURRENT_BINARY_DIR}/thrift/lib/thrift
-  COMMAND
-    cp ${FBTHRIFT_SOURCE_DIR}/thrift/lib/thrift/frozen.thrift
-       ${CMAKE_CURRENT_BINARY_DIR}/thrift/lib/thrift/
-  COMMAND cd ${CMAKE_CURRENT_BINARY_DIR}/thrift/lib/thrift &&
-          ${DEPS}/bin/thrift1 --gen mstch_cpp2 frozen.thrift
->>>>>>> main
   DEPENDS ${FBTHRIFT_PRJ}
 )
 
 add_custom_command(
   OUTPUT ${METADATA_THRIFT_SRC}
-<<<<<<< HEAD
   COMMAND ${CMAKE_COMMAND} -E make_directory  ${CMAKE_CURRENT_BINARY_DIR}/thrift/dwarfs
   COMMAND ${CMAKE_COMMAND} -E copy  ${CMAKE_CURRENT_SOURCE_DIR}/thrift/metadata.thrift thrift/dwarfs/metadata.thrift
   COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_CURRENT_BINARY_DIR}/thrift/dwarfs ${DEPS}/bin/thrift1 --gen mstch_cpp2:frozen2  metadata.thrift
-=======
-  COMMAND mkdir -p ${CMAKE_CURRENT_BINARY_DIR}/thrift/dwarfs
-  COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/thrift/metadata.thrift
-          thrift/dwarfs/metadata.thrift
-  COMMAND
-    cd ${CMAKE_CURRENT_BINARY_DIR}/thrift/dwarfs &&
-    ${DEPS}/bin/thrift1 --gen mstch_cpp2:frozen2
-    metadata.thrift
->>>>>>> main
   DEPENDS ${FBTHRIFT_PRJ}
           ${CMAKE_CURRENT_SOURCE_DIR}/thrift/metadata.thrift)
 
@@ -830,18 +744,12 @@ endif()
 
 foreach(tgt ${BINARY_TARGETS})
   target_link_libraries(${tgt} dwarfs)
-<<<<<<< HEAD
 #  if(USE_JEMALLOC)
 #    target_link_libraries(${tgt} ${Jemalloc_LIBRARIES})
 #  endif(USE_JEMALLOC)
 #  if (IS_MSYS)
 #    target_link_libraries(${tgt} wsock32 ws2_32)
 #  endif(IS_MSYS)
-=======
-  if(USE_JEMALLOC)
-    target_link_libraries(${tgt} ${Jemalloc_LIBRARIES})
-  endif(USE_JEMALLOC)
->>>>>>> main
 endforeach()
 
 if(STATIC_BUILD_DO_NOT_USE)

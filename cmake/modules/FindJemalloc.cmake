@@ -4,13 +4,8 @@
 # List of libraries when using jemalloc. Jemalloc_FOUND - True if jemalloc
 # found.
 
-<<<<<<< HEAD
 find_path(Jemalloc_INCLUDE_DIRS NAMES jemalloc/jemalloc.h)                         #  HINTS ${DEPS}/include
 find_library(Jemalloc_LIBRARIES NAMES jemalloc)                                    #  HINTS ${DEPS}/lib
-=======
-find_path(Jemalloc_INCLUDE_DIRS NAMES jemalloc/jemalloc.h)
-find_library(Jemalloc_LIBRARIES NAMES jemalloc)
->>>>>>> main
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(Jemalloc DEFAULT_MSG Jemalloc_LIBRARIES

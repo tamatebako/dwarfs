@@ -33,10 +33,7 @@ name: Ubuntu
 
 on:
   push:
-<<<<<<< HEAD
     branches: [ main ]
-=======
->>>>>>> main
     paths-ignore:
       - 'docs/**'
       - '**.adoc'
@@ -58,7 +55,6 @@ env:
   RUBY_VER:   "2.7.5"
 
 jobs:
-<<<<<<< HEAD
  # https://wildwolf.name/github-actions-how-to-avoid-running-the-same-workflow-multiple-times/
   prepare:
     runs-on: ubuntu-latest
@@ -87,10 +83,6 @@ jobs:
   build:
     name: ${{ matrix.os }} [${{ matrix.env.CC }}, ${{ matrix.setup.scope }}]
     needs: prepare
-=======
-  build:
-    name: ${{ matrix.os }} [${{ matrix.env.CC }}, ${{ matrix.setup.scope }}]
->>>>>>> main
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false

@@ -33,10 +33,7 @@ name: MacOS
 
 on:
   push:
-<<<<<<< HEAD
     branches: [ main ]
-=======
->>>>>>> main
     paths-ignore:
       - 'docs/**'
       - '**.adoc'
@@ -59,7 +56,6 @@ env:
   CXXFLAGS: -std=gnu++14 -DTARGET_OS_SIMULATOR=0 -DTARGET_OS_IPHONE=0
 
 jobs:
-<<<<<<< HEAD
  # https://wildwolf.name/github-actions-how-to-avoid-running-the-same-workflow-multiple-times/
   prepare:
     runs-on: ubuntu-latest
@@ -88,10 +84,6 @@ jobs:
   build:
     name: "macos-${{ matrix.setup.version }} [ scope:${{ matrix.setup.scope }} ]"
     needs: prepare
-=======
-  build:
-    name: "macos-${{ matrix.setup.version }} [ scope:${{ matrix.setup.scope }} ]"
->>>>>>> main
     runs-on: macos-${{ matrix.setup.version }}
     strategy:
       fail-fast: false

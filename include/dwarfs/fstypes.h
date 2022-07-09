@@ -29,11 +29,6 @@
 #include <memory>
 #include <string>
 
-<<<<<<< HEAD
-=======
-#include <sys/uio.h>
-
->>>>>>> main
 #include <folly/small_vector.h>
 
 #include "dwarfs/block_compressor.h" // TODO: or the other way round?

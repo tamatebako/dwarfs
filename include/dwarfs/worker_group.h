@@ -59,7 +59,7 @@ class worker_group {
   explicit worker_group(
       const char* group_name, size_t num_workers = 1,
       size_t max_queue_len = std::numeric_limits<size_t>::max(),
-#ifndef _WIN32      
+#ifndef _WIN32
       int niceness = 0
 #else
       int nPriority = THREAD_PRIORITY_NORMAL
@@ -75,7 +75,7 @@ class worker_group {
       load_adaptive_tag, const char* group_name = nullptr,
       size_t max_num_workers = 1,
       size_t max_queue_len = std::numeric_limits<size_t>::max(),
-#ifndef _WIN32      
+#ifndef _WIN32
       int niceness = 0
 #else
       int nPriority = THREAD_PRIORITY_NORMAL

@@ -239,7 +239,6 @@ class basic_worker_group final : public worker_group::impl, private Policy {
         t += info.user_time.seconds + info.user_time.microseconds * 1e-6;
         t += info.system_time.seconds + info.system_time.microseconds * 1e-6;
       }
-<<<<<<< HEAD
 #elif defined(_WIN32)
       FILETIME CreationTime, ExitTime, KernelTime, UserTime;
 // pthread_gethandle is MINGW private extension
@@ -251,8 +250,6 @@ class basic_worker_group final : public worker_group::impl, private Policy {
       }
 // We do nothing on error, just leave time equal to 0
 // Also note that GetThreadTimes is not really reliable
-=======
->>>>>>> main
 #else
       ::clockid_t cid;
       struct ::timespec ts;
