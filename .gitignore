@@ -14,6 +14,10 @@
 .vscode/
 out/
 CMakeSettings.json
+<<<<<<< HEAD
+=======
+jemalloc/
+>>>>>>> main
 
 # More build artifacts
 arm-homebrew/

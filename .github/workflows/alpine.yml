@@ -33,7 +33,10 @@ name: Alpine
 
 on:
   push:
+<<<<<<< HEAD
     branches: [ main ]
+=======
+>>>>>>> main
     paths-ignore:
       - 'docs/**'
       - '**.adoc'
@@ -53,6 +56,7 @@ env:
   BUILD_TYPE: Release
 
 jobs:
+<<<<<<< HEAD
  # https://wildwolf.name/github-actions-how-to-avoid-running-the-same-workflow-multiple-times/
   prepare:
     runs-on: ubuntu-latest
@@ -80,6 +84,10 @@ jobs:
   build:
     name: alpine:latest [${{ matrix.env.CC }}, ${{ matrix.setup.scope }}]
     needs: prepare
+=======
+  build:
+    name: alpine:latest [${{ matrix.env.CC }}, ${{ matrix.setup.scope }}]
+>>>>>>> main
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
