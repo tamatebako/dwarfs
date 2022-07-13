@@ -33,7 +33,7 @@ name: Ubuntu
 
 on:
   push:
-    branches: [ main ]
+#    branches: [ main ]
     paths-ignore:
       - 'docs/**'
       - '**.adoc'
@@ -49,6 +49,10 @@ on:
       - '!.github/workflows/ubuntu.yml'
   workflow_dispatch:
 
+concurrency:
+  group: '${{ github.workflow }}-${{ github.job }}-${{ github.head_ref || github.ref_name }}'
+  cancel-in-progress: true
+  
 env:
   MAKEFLAGS: -j4
 # Ruby  (this is required for ronn)

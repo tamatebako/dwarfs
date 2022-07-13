@@ -33,7 +33,7 @@ name: Windows-MSys
 
 on:
   push:
-    branches: [ main ]
+#    branches: [ main ]
     paths-ignore:
       - 'docs/**'
       - '**.adoc'
@@ -49,6 +49,10 @@ on:
       - '!.github/workflows/windows-msys.yml'
   workflow_dispatch:
 
+concurrency:
+  group: '${{ github.workflow }}-${{ github.job }}-${{ github.head_ref || github.ref_name }}'
+  cancel-in-progress: true
+  
 env:
   BUILD_TYPE: Release
 
