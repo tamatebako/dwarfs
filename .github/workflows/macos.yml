@@ -97,19 +97,13 @@ jobs:
 
       - name: Configure
         run: |
-          mkdir build
-          cd build
-          cmake .. -DWITH_TESTS=${{ matrix.setup.tests }}         \
-                   -DTEBAKO_BUILD_SCOPE=${{ matrix.setup.scope }} \
-                   -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/install
+          cmake -B build -DWITH_TESTS=${{ matrix.setup.tests }}         \
+                         -DTEBAKO_BUILD_SCOPE=${{ matrix.setup.scope }} \
+                         -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/install
 
       - name: Build
-        run: |
-          cd build
-          make -j4
+        run: cmake --build build --parallel 4
 
       - name: Test
         if: ${{ matrix.setup.tests == 'ON' }}
-        run: |
-          cd build
-          make test
+        run: ctest --test-dir build --output-on-failure
