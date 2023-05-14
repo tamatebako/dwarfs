@@ -70,7 +70,7 @@ link_directories(${DEPS_LIB_DIR})
 
 # -------------------------------------------------------------------------------------------------------------------------------
 # Build scopes
-#  ALL -- build library, all tools            [WITH_TEST or WITH_BENCHMARKS ensofce this scope]
+#  ALL -- build library, all tools            [WITH_TEST or WITH_BENCHMARKS enforce this scope]
 #  MKD -- build library and mkdwarfs utility  [This is the configuration required for tebako]
 #  LIB -- build library only                  [This configuration is required for cross compilation of tebako packaged software]
 #                                             [For example in order to build MacOS arm64 package on MacOS x86_64               ]
