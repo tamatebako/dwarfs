@@ -77,23 +77,7 @@ link_directories(${DEPS_LIB_DIR})
 #  MKD -- build library and mkdwarfs utility  [This is the configuration required for tebako]
 #  LIB -- build library only                  [This configuration is required for cross compilation of tebako packaged software]
 #                                             [For example in order to build MacOS arm64 package on MacOS x86_64               ]
-#  TEBAKO_BUILD_TARGET variable defines compiler -target setting but not for FbThrift, of course
 # -------------------------------------------------------------------------------------------------------------------------------
-
-if(TEBAKO_BUILD_TARGET)
-  message(STATUS "Building dwarfs for ${TEBAKO_BUILD_TARGET}")
-  add_compile_options("--target=${TEBAKO_BUILD_TARGET}")
-  add_link_options("--target=${TEBAKO_BUILD_TARGET}")
-
-  if(WITH_TESTS)
-    message(WARNING "Cross-compiling amd tests are mutually exclusive. WITH_TESTS parameter was forced to OFF")
-    set(WITH_TESTS OFF)
-  endif()
-  if(WITH_BENCHMARKS)
-    message(WARNING "Cross-compiling amd benchmarking are mutually exclusive. WITH_BENCHMARKS parameter was forced to OFF")
-    set(WITH_BENCHMARKS OFF)
-  endif()
-endif()
 
 if(NOT TEBAKO_BUILD_SCOPE)
   set(TEBAKO_BUILD_SCOPE "ALL")
