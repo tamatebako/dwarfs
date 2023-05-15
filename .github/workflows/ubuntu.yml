@@ -33,7 +33,7 @@ name: Ubuntu
 
 on:
   schedule:
-    - cron: "0 6 * * 6" 
+    - cron: "0 6 * * 6"
   push:
     branches: [ main ]
     paths-ignore:
@@ -153,8 +153,8 @@ jobs:
 
       - name: Configure
         run: |
-          cmake -B build -DWITH_TESTS=${{ matrix.setup.tests }} \
-                         -DTEBAKO_BUILD_SCOPE=${{ matrix.setup.scope }}
+          cmake -B build -DWITH_TESTS=${{ matrix.setup.tests }}           \
+                         -DTEBAKO_BUILD_SCOPE=${{ matrix.setup.scope }}   \
                          -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/install
 
       - name: Build
