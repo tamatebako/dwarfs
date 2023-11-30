@@ -216,11 +216,22 @@ if (${PATCH_FOLLY})
   endif(PATCH_FOLLY_RES EQUAL 0)
 endif(${PATCH_FOLLY})
 
+# We could use feature macro __cpp_lib_char8_t but some compilers provide char8_t support
+# but have related bugs (for exmple clang++ 14 fails to link std::u8string(reinterpret_cast<char8_t const*>("test"), 4))
+# https://github.com/llvm/llvm-project/issues/56357
 check_cxx_source_compiles(
   "#include <filesystem>
+
+  inline std::u8string string_to_u8string(std::string const& in)
+  {
+      return std::u8string(reinterpret_cast<char8_t const*>(in.data()), in.size());
+  }
+
+  std::u8string u8name() { return string_to_u8string(std::string(\"test\")); }
+
   int main() {
     std::filesystem::path p = \"\";
-    std::u8string s;
+    std::u8string s = u8name();
     p = p / s;
     return 0;
   }"
