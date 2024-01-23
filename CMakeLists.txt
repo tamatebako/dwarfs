@@ -771,36 +771,52 @@ if(WITH_TESTS OR WITH_BENCHMARKS OR WITH_FUZZ)
 endif()
 
 if(WITH_TESTS)
-  add_executable(dwarfs_test test/dwarfs.cpp)
-  add_executable(dwarfs_compat_test test/dwarfs_compat.cpp)
-  add_executable(dwarfs_badfs_test test/dwarfs_badfs.cpp)
-  if(FUSE3_FOUND OR WINFSP OR FUSE_FOUND)
-    add_executable(dwarfs_tools_test test/dwarfs_tools.cpp)
-  endif()
-  add_executable(dwarfs_utils_test test/utils_test.cpp)
+  list(APPEND DWARFS_TESTS
+    badfs_test
+    block_cache_test
+    block_merger_test
+    checksum_test
+    chmod_transformer_test
+    compat_test
+    dwarfs_test
+    entry_test
+    error_test
+    file_access_test
+    filesystem_test
+    fragment_category_test
+    incompressible_categorizer_test
+    integral_value_parser_test
+    lazy_value_test
+    metadata_requirements_test
+    pcm_sample_transformer_test
+    pcmaudio_categorizer_test
+    speedometer_test
+    terminal_test
+    tool_main_test
+    tools_test
+    utils_test
+    worker_group_test
+  )
 
-  target_link_libraries(dwarfs_test test_helpers gtest gtest_main)
-  target_link_libraries(dwarfs_compat_test gtest gtest_main)
-  target_link_libraries(dwarfs_badfs_test gtest gtest_main)
-  if(FUSE3_FOUND OR WINFSP OR FUSE_FOUND)
-    target_link_libraries(dwarfs_tools_test test_helpers gtest gtest_main)
-  endif()
-  target_link_libraries(dwarfs_utils_test gtest gtest_main)
-
-  list(APPEND BINARY_TARGETS dwarfs_test dwarfs_compat_test dwarfs_badfs_test
-       dwarfs_utils_test)
-
-  if(FUSE3_FOUND OR WINFSP OR FUSE_FOUND)
-    list(APPEND BINARY_TARGETS dwarfs_tools_test)
+  if(WITH_MAN_OPTION)
+    list(APPEND DWARFS_TESTS manpage_test)
   endif()
 
-  gtest_discover_tests(dwarfs_test DISCOVERY_TIMEOUT 120)
-  gtest_discover_tests(dwarfs_compat_test DISCOVERY_TIMEOUT 120)
-  gtest_discover_tests(dwarfs_badfs_test DISCOVERY_TIMEOUT 120)
-  if(FUSE3_FOUND OR WINFSP OR FUSE_FOUND)
-    gtest_discover_tests(dwarfs_tools_test DISCOVERY_TIMEOUT 120)
+  if(FLAC_FOUND)
+    list(APPEND DWARFS_TESTS flac_compressor_test)
   endif()
-  gtest_discover_tests(dwarfs_utils_test DISCOVERY_TIMEOUT 120)
+
+  foreach (test ${DWARFS_TESTS})
+    add_executable(${test} test/${test}.cpp)
+    target_link_libraries(
+      ${test} test_helpers gmock gtest gtest_main
+      ${MAIN_TARGETS}
+    )
+    target_compile_definitions(${test}
+      PRIVATE TEST_DATA_DIR=\"${CMAKE_SOURCE_DIR}/test\"
+              TOOLS_BIN_DIR=\"${CMAKE_CURRENT_BINARY_DIR}\")
+    list(APPEND TEST_TARGETS ${test})
+  endforeach()
 
   foreach(tgt ${TEST_TARGETS})
     gtest_discover_tests(${tgt} DISCOVERY_TIMEOUT 120)
