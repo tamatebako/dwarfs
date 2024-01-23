@@ -126,6 +126,7 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 endif()
 
 include(${CMAKE_SOURCE_DIR}/cmake/version.cmake)
+include(${CMAKE_SOURCE_DIR}/cmake/thrift_library.cmake)
 
 # -----------------------------------------------------------------------------------------
 message(STATUS ">>>>> Applying tebako settings")
