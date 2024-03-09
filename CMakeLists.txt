@@ -162,6 +162,7 @@ set(IS_MSYS OFF)
 if(MSVC)
   set(OSTYPE_TXT "Windows")
   message(STATUS "OSTYPE (forced by MSVC): '${OSTYPE_TXT}'")
+  set(PREFER_SYSTEM_LIBFMT ON)
 elseif(MINGW)
   set(OSTYPE_TXT "msys")
   message(STATUS "OSTYPE  (forced by MINGW): '${OSTYPE_TXT}'")
@@ -351,6 +352,7 @@ else()
     GIT_TAG 10.1.0
   )
   FetchContent_MakeAvailable(fmt)
+  include_directories(${fmt_SOURCE_DIR}/include)
 endif()
 
 find_package(Boost 1.67 REQUIRED COMPONENTS chrono iostreams program_options)
@@ -565,6 +567,7 @@ list(
 
 if(DWARFS_GIT_BUILD)
   list(APPEND LIBDWARFS_SRC ${CMAKE_CURRENT_BINARY_DIR}/src/dwarfs/version.cpp)
+  include_directories(dwarfs PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/include)
 else()
   list(APPEND LIBDWARFS_SRC src/dwarfs/version.cpp)
 endif()
@@ -588,16 +591,12 @@ add_library(dwarfs ${LIBDWARFS_SRC})
 add_library(dwarfs_compression ${LIBDWARFS_COMPRESSION_SRC})
 add_library(dwarfs_tool src/dwarfs/tool.cpp)
 
-if(DWARFS_GIT_BUILD)
-  target_include_directories(dwarfs PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/include)
-endif()
+# [maxirmx] For me it does not make sense but is required on Ubuntu 20.04 (gcc 10.5)
+target_link_libraries(dwarfs_tool dwarfs)
 
 target_compile_definitions(
   dwarfs_tool PRIVATE PRJ_BUILD_ID="${CMAKE_SYSTEM_PROCESSOR}, ${CMAKE_SYSTEM}, ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}"
 )
-
-target_link_libraries(dwarfs_compression folly)
-target_link_libraries(dwarfs_tool dwarfs)
 
 if(STATIC_BUILD_DO_NOT_USE)
   add_link_options(-static -static-libgcc)
@@ -606,7 +605,6 @@ endif(STATIC_BUILD_DO_NOT_USE)
 if("${TEBAKO_BUILD_SCOPE}" STREQUAL "ALL" OR
    "${TEBAKO_BUILD_SCOPE}" STREQUAL "MKD")
    add_library(mkdwarfs_main src/mkdwarfs_main.cpp)
-   target_link_libraries(mkdwarfs_main folly)
 
    add_executable(mkdwarfs src/mkdwarfs.cpp)
    target_link_libraries(mkdwarfs mkdwarfs_main)
@@ -621,10 +619,6 @@ if("${TEBAKO_BUILD_SCOPE}" STREQUAL "ALL")
   add_library(dwarfsck_main src/dwarfsck_main.cpp)
   add_library(dwarfsbench_main src/dwarfsbench_main.cpp)
   add_library(dwarfsextract_main src/dwarfsextract_main.cpp)
-
-  target_link_libraries(dwarfsck_main folly)
-  target_link_libraries(dwarfsbench_main folly)
-  target_link_libraries(dwarfsextract_main folly)
 
   add_executable(dwarfsck src/dwarfsck.cpp)
   add_executable(dwarfsbench src/dwarfsbench.cpp)
@@ -950,6 +944,9 @@ foreach(tgt dwarfs dwarfs_compression dwarfs_tool ${BINARY_TARGETS} ${MAIN_TARGE
   set_property(TARGET ${tgt} PROPERTY CXX_EXTENSIONS OFF)
 
   add_dependencies(${tgt} metadata_thrift)
+  if (NOT ("${OSTYPE_TXT}" MATCHES "Windows"))
+    add_dependencies(${tgt} ${LIBARCHIVE_PRJ})
+  endif()
 
   if(ENABLE_ASAN)
     target_compile_options(${tgt} PRIVATE -fsanitize=address
@@ -1006,6 +1003,10 @@ list(APPEND LIBRARIES
   fsst
   ${Boost_LIBRARIES}
 )
+
+if(NOT PREFER_SYSTEM_LIBFMT)
+  list(APPEND LIBRARIES fmt)
+endif()
 
 if(LIBLZ4_FOUND)
   list(APPEND LIBRARIES PkgConfig::LIBLZ4)

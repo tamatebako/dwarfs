@@ -63,7 +63,7 @@ env:
 
 jobs:
   build:
-    name: windows-msys [${{ matrix.env.CC }}, ${{ matrix.setup.scope }}]
+    name: windows-msys [${{ matrix.env.CC }}, scope ${{ matrix.setup.scope }}, Release]
     runs-on: windows-latest
     strategy:
       fail-fast: false
@@ -107,8 +107,8 @@ jobs:
             diffutils:p
             libevent:p
             double-conversion:p
-            glog:p
             fmt:p
+            glog:p
             dlfcn:p
             ninja:p
             ccache:p
