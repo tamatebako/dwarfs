@@ -163,15 +163,15 @@ if(MSVC)
   set(OSTYPE_TXT "Windows")
   message(STATUS "OSTYPE (forced by MSVC): '${OSTYPE_TXT}'")
   set(PREFER_SYSTEM_LIBFMT ON)
-  add_definitions(-DGLOG_EXPORT)
+  add_compile_definitions(GLOG_NO_EXPORT)
 elseif(MINGW)
   set(OSTYPE_TXT "msys")
   message(STATUS "OSTYPE  (forced by MINGW): '${OSTYPE_TXT}'")
   set(IS_MSYS ON)
-# This is because of some new features of glog 0.7.0
-  add_definitions(-DGLOG_USE_GLOG_EXPORT)
+  # This will be needed (?) because of some new features of glog 0.7.0
+  # add_compile_definitions(GLOG_NO_EXPORT)
   include(${TOOLS}/cmake-scripts/setup-libarchive.cmake)
-else(MSVC)
+  else(MSVC)
   include(${TOOLS}/cmake-scripts/setup-libarchive.cmake)
 
   execute_process(
