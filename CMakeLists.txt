@@ -159,7 +159,7 @@ include_directories(${DEPS_INCLUDE_DIR})
 link_directories(${DEPS_LIB_DIR})
 
 # This is because of some new features of glog 0.7.0
-add_definitions(-DGLOG_USE_GLOG_EXPORT)
+add_definitions(-DGLOG_EXPORT)
 
 set(IS_MSYS OFF)
 if(MSVC)
