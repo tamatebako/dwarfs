@@ -94,7 +94,6 @@ jobs:
 # Install folly to see if it breaks dwarfs build
       - name: Install packages
         run: |
-          brew update
           brew install  \
           bison flex gnu-sed bash boost double-conversion jemalloc fmt glog folly
 
