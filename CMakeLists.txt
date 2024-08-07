@@ -155,7 +155,7 @@ set(TOOLS "${CMAKE_CURRENT_SOURCE_DIR}/tools")
 
 include(${TOOLS}/cmake-scripts/def-external-project.cmake)
 
-include_directories(${DEPS_INCLUDE_DIR})
+include_directories(${DEPS_INCLUDE_DIR} ${CMAKE_SOURCE_DIR}/folly)
 link_directories(${DEPS_LIB_DIR})
 
 set(IS_MSYS OFF)
