@@ -91,10 +91,11 @@ jobs:
         with:
           xcode-version: ${{ matrix.config.xcode }}
 
+# Install folly to see if it breaks dwarfs build
       - name: Install packages
         run: |
           brew install  \
-          bison flex gnu-sed bash boost double-conversion jemalloc fmt glog ccache
+          bison flex gnu-sed bash boost double-conversion jemalloc fmt glog ccache folly
 
       - name: Checkout
         uses: actions/checkout@v4
