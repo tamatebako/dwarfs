@@ -134,6 +134,7 @@ jobs:
                 -DTEBAKO_BUILD_SCOPE=${{ matrix.setup.scope }}           \
                 -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }}                 \
                 -GNinja .
+          cat fbthrift/thrift/compiler/lib/cpp2/util.h
 
       - name: Load Cache
         uses: actions/cache@v4
