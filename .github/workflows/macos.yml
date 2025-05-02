@@ -96,7 +96,7 @@ jobs:
       - name: Install packages
         run: |
           brew install  \
-          bison flex gnu-sed bash boost double-conversion jemalloc fmt glog ccache folly
+          bison flex gnu-sed bash boost double-conversion jemalloc fmt glog ccache folly zstd
           brew reinstall cmake
 
       - name: Checkout

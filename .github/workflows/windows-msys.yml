@@ -110,6 +110,7 @@ jobs:
             dlfcn:p
             ninja:p
             ccache:p
+            zstd:p
 
       - name: Checkout
         uses: actions/checkout@v4

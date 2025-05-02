@@ -42,7 +42,6 @@ else()
   option(ENABLE_UBSAN "enable undefined behaviour sanitizer" OFF)
   option(ENABLE_COVERAGE "enable code coverage" OFF)
   option(USE_JEMALLOC "build with jemalloc" ON)
-  option(PREFER_SYSTEM_ZSTD "use system zstd if available" OFF)
   option(PREFER_SYSTEM_XXHASH "use system xxHash if available" OFF)
   option(PREFER_SYSTEM_GTEST "use system gtest if available" OFF)
   option(DISABLE_CCACHE "disable ccache" OFF)
@@ -393,7 +392,7 @@ if(PKG_CONFIG_FOUND)
   if (MSVC)
     pkg_check_modules(LIBARCHIVE IMPORTED_TARGET libarchive>=3.6.0)
   endif(MSVC)
-  pkg_check_modules(ZSTD IMPORTED_TARGET libzstd>=1.5.2)
+  pkg_check_modules(ZSTD IMPORTED_TARGET libzstd>=1.4.8)
   pkg_check_modules(XXHASH IMPORTED_TARGET libxxhash>=0.8.1)
 endif()
 
@@ -469,10 +468,6 @@ add_subdirectory(folly EXCLUDE_FROM_ALL)                        # tebako -- was 
                                                                 # which requires installation on Alpine 3.18 which needs gcompat
                                                                 # that I would like to avoid
 add_subdirectory(fbthrift EXCLUDE_FROM_ALL)                     # tebako -- was ... EXCLUDE_FROM_ALL SYSTEM ...  but it requires CMAKE 3.25
-if(NOT (ZSTD_FOUND AND PREFER_SYSTEM_ZSTD))
-  set(ZSTD_BUILD_SHARED OFF)
-  add_subdirectory(zstd/build/cmake EXCLUDE_FROM_ALL)           # tebako -- was ... EXCLUDE_FROM_ALL SYSTEM ...  but it requires CMAKE 3.25
-endif()
 
 set_property(TARGET folly PROPERTY CXX_STANDARD 20)
 set_property(TARGET folly_base PROPERTY CXX_STANDARD 20)
@@ -868,10 +863,6 @@ list(
   ${CMAKE_CURRENT_SOURCE_DIR}/fbthrift
   ${CMAKE_CURRENT_BINARY_DIR})
 
-if(NOT (ZSTD_FOUND AND PREFER_SYSTEM_ZSTD))
-  list(APPEND INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/zstd/lib)
-endif()
-
 if(NOT
    (XXHASH_FOUND
     AND XXHASH_VERSION_OK
@@ -1046,11 +1037,7 @@ if(NOT STATIC_BUILD_DO_NOT_USE)
   endif(MSVC)
 endif(NOT STATIC_BUILD_DO_NOT_USE)
 
-if(ZSTD_FOUND AND PREFER_SYSTEM_ZSTD)
-  list(APPEND LIBRARIES PkgConfig::ZSTD)
-else()
-  list(APPEND LIBRARIES libzstd_static)
-endif()
+list(APPEND LIBRARIES PkgConfig::ZSTD)
 
 if(XXHASH_FOUND
    AND XXHASH_VERSION_OK
@@ -1164,7 +1151,7 @@ add_custom_target(
         "dwarfs_test[1]_include.cmake"
         "dwarfs_tools_test[1]_include.cmake"
         "dwarfs_utils_test[1]_include.cmake"
-        fbthrift folly zstd
+        fbthrift folly
         include src thrift universal bin lib man1 man5
         vcpkg-manifest-install.log
         dwarfs.exe.manifest dwarfsbench.exe.manifest
