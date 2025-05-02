@@ -225,6 +225,8 @@ if ("${OSTYPE_TXT}" MATCHES "^darwin*")
   include(${TOOLS}/cmake-scripts/macos-environment.cmake)
   include(${TOOLS}/cmake-scripts/setup-libutfcpp.cmake)
   add_dependencies(_LIBARCHIVE ${LIBUTFCPP_PRJ})
+  # Disable problematic C++17 string_view features causing Folly build issues
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_LIBCPP_DISABLE_EXPLICIT_TEMPLATE_INSTANTIATION_CHECKS")
 endif()
 
 if ("${OSTYPE_TXT}" MATCHES "msys")
