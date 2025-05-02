@@ -195,8 +195,13 @@ elseif(MINGW)
   endif(OSTYPE_RES EQUAL 0)
 endif(MSVC)
 
-set(PATCH_FOLLY OFF)
-set(PATCH_FBTHRIFT OFF)
+if (NOT NO_PATCH)
+  set(PATCH_FOLLY ON)
+  set(PATCH_FBTHRIFT ON)
+else(NOT NO_PATCH)
+  set(PATCH_FOLLY OFF)
+  set(PATCH_FBTHRIFT OFF)
+endif(NOT NO_PATCH)
 
 if(DEFINED OPENSSL_ROOT_DIR)
 # This is required because dwarfs itself does not do FindOpenSSL
@@ -209,18 +214,12 @@ if("${OSTYPE_TXT}" MATCHES "^linux-musl.*")
   include(${TOOLS}/cmake-scripts/setup-libutfcpp.cmake)
   add_dependencies(_LIBARCHIVE ${LIBUTFCPP_PRJ})
 
-  if (NOT NO_PATCH)
-    set(PATCH_FOLLY ON)
-  endif(NOT NO_PATCH)
 endif()
 
 if ("${OSTYPE_TXT}" MATCHES "^darwin*")
   include(${TOOLS}/cmake-scripts/macos-environment.cmake)
   include(${TOOLS}/cmake-scripts/setup-libutfcpp.cmake)
   add_dependencies(_LIBARCHIVE ${LIBUTFCPP_PRJ})
-  if (NOT NO_PATCH)
-    set(PATCH_FOLLY ON)
-  endif(NOT NO_PATCH)
 endif()
 
 if ("${OSTYPE_TXT}" MATCHES "msys")
@@ -229,14 +228,9 @@ if ("${OSTYPE_TXT}" MATCHES "msys")
   add_dependencies(_LIBARCHIVE ${LIBUTFCPP_PRJ})
   find_library(WINSOCK ws2_32 REQUIRED)
   message(STATUS "Using winsock2 at ${WINSOCK}")
-
-  if (NOT NO_PATCH)
-    set(PATCH_FOLLY ON)
-    set(PATCH_FBTHRIFT ON)
-  endif(NOT NO_PATCH)
 endif()
 
-if (${PATCH_FOLLY})  
+if (${PATCH_FOLLY})
   message(STATUS "Patching folly with '${GNU_BASH} ${CMAKE_CURRENT_SOURCE_DIR}/tools/ci-scripts/patch-folly.sh ${FOLLY_ROOT}'")
   execute_process(
     COMMAND "${GNU_BASH}"
