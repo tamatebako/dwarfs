@@ -392,7 +392,7 @@ if(PKG_CONFIG_FOUND)
   if (MSVC)
     pkg_check_modules(LIBARCHIVE IMPORTED_TARGET libarchive>=3.6.0)
   endif(MSVC)
-  pkg_check_modules(ZSTD IMPORTED_TARGET libzstd>=1.4.8)
+  pkg_check_modules(ZSTD IMPORTED_TARGET libzstd>=1.4.4)
   pkg_check_modules(XXHASH IMPORTED_TARGET libxxhash>=0.8.1)
 endif()
 
