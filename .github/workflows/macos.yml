@@ -102,7 +102,13 @@ jobs:
           submodules: true
 
       - name: Get number of CPU cores
-        run:  echo "CORES=$(sysctl -n hw.ncpu)" >> $GITHUB_ENV
-
+        run:  |
+         echo "CORES=$(sysctl -n hw.ncpu)" >> $GITHUB_ENV
+         echo "CC=$(brew --prefix llvm@15)/bin/clang" >> $GITHUB_ENV
+         echo "CXX=$(brew --prefix llvm@15)/bin/clang++" >> $GITHUB_ENV
+         echo "PATH=$(brew --prefix llvm@15)/bin:$PATH" >> $GITHUB_ENV
+         echo "LDFLAGS=-L$(brew --prefix llvm@15)/lib" >> $GITHUB_ENV
+         echo "CPPFLAGS=-I$(brew --prefix llvm@15)/include" >> $GITHUB_ENV
+         echo "LIBRARY_PATH=$(brew --prefix llvm@15)/lib" >> $GITHUB_ENV
       - name: Build and test
         uses: ./.github/actions/build-and-test
