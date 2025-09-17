@@ -463,7 +463,7 @@ endif("${TEBAKO_BUILD_SCOPE}" STREQUAL "ALL")
 
 if(USE_JEMALLOC)
   pkg_check_modules(JEMALLOC IMPORTED_TARGET jemalloc>=5.2.1)
-  add_compile_definitions(USE_JEMALLOC)
+  add_compile_definitions(USE_JEMALLOC FOLLY_ASSUME_NO_TCMALLOC)
 endif()
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
