@@ -235,7 +235,7 @@ if ("${OSTYPE_TXT}" MATCHES "^darwin*")
   include(${TOOLS}/cmake-scripts/setup-libutfcpp.cmake)
   add_dependencies(_LIBARCHIVE ${LIBUTFCPP_PRJ})
   if(USE_JEMALLOC)
-    add_compile_definitions(USE_JEMALLOC)
+    add_compile_definitions(USE_JEMALLOC JEMALLOC_MANGLE)
   endif(USE_JEMALLOC)
 endif()
 
