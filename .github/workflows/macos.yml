@@ -69,10 +69,10 @@ jobs:
       fail-fast: false
       matrix:
         config:
-# macos-12 -- amd64 runner
+# macos-13 -- amd64 runner which now fails
 # macos-14 -- arm64 (M1) runner
 # Need XCode 14.3 for std::boyer_moore_horspool_searcher
-          - { os: macos-13, xcode: '14.3.1' , build_type: Release, extra_opts: '' }
+#          - { os: macos-13, xcode: '14.3.1' , build_type: Release, extra_opts: '' }
           - { os: macos-14, xcode: '15.0.1' , build_type: Release, extra_opts: '' }
           - { os: macos-14, xcode: '15.4'   , build_type: Release, extra_opts: '' }
 
